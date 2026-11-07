@@ -7,5 +7,5 @@
     "service_worker": "service-worker.js",
     "type": "module"
   },
-  "permissions": ["storage"]
+  "permissions": ["storage", "tabs", "idle", "alarms"]
 }
