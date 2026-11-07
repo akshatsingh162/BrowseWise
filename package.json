@@ -1,0 +1,26 @@
+{
+  "name": "browsewise",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Privacy-first browser screen-time and digital wellbeing extension for Google Chrome.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.14.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.14.0",
+    "prettier": "^3.9.10",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
+  }
+}
