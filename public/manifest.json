@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "BrowseWise",
+  "version": "0.1.0",
+  "description": "Privacy-first screen-time tracking for Chrome. All data stays on your device.",
+  "background": {
+    "service_worker": "service-worker.js",
+    "type": "module"
+  },
+  "permissions": ["storage"]
+}

@@ -1,6 +1,6 @@
 {
   "name": "browsewise",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "Privacy-first browser screen-time and digital wellbeing extension for Google Chrome.",
   "type": "module",
@@ -9,6 +9,8 @@
     "node": ">=20"
   },
   "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
