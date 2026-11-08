@@ -25,7 +25,7 @@ function renderHeader({ onOpenDashboard }) {
     el('div', { class: 'pp-brand' }, [
       el('img', {
         class: 'pp-logo',
-        src: chrome.runtime.getURL('icons/icon-32.png'),
+        src: chrome.runtime.getURL('icons/logo.svg'),
         alt: '',
         width: 20,
         height: 20,
