@@ -29,6 +29,9 @@
   --bw-accent-soft: rgba(124, 108, 240, 0.14);
   --bw-on-accent: #ffffff;
 
+  /* Charts: a neutral series for comparisons (e.g. the previous period) */
+  --bw-chart-muted: #3b4150;
+
   /* Semantic */
   --bw-danger: #f87171;
   --bw-warning: #f5a524;

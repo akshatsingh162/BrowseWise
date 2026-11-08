@@ -1,6 +1,10 @@
 import { requestLiveFlush } from '../shared/live-flush.js';
 import { subscribeToUsageChanges } from '../shared/usage-events.js';
+import { loadDailyAnalytics, loadMonthlyAnalytics, loadWeeklyAnalytics } from './analytics-data.js';
+import { createChart } from './charts/chart-factory.js';
+import { readChartTheme } from './charts/chart-theme.js';
 import { loadOverviewData, loadWebsiteUsage } from './data.js';
+import { mountAnalyticsPage } from './pages/analytics.js';
 import { mountComingSoonPage } from './pages/coming-soon.js';
 import { mountOverviewPage } from './pages/overview.js';
 import { mountWebsitesPage } from './pages/websites.js';
@@ -17,11 +21,13 @@ const PAGES = {
   overview: (container) => mountOverviewPage(container, { ...liveDeps, loadOverviewData }),
   websites: (container) => mountWebsitesPage(container, { ...liveDeps, loadWebsiteUsage }),
   analytics: (container) =>
-    mountComingSoonPage(container, {
-      title: 'Analytics',
-      description: 'Daily, weekly, and monthly trends.',
-      iconName: 'chart-column',
-      text: 'Hourly activity, weekly comparisons, and monthly trends will appear here.',
+    mountAnalyticsPage(container, {
+      ...liveDeps,
+      loadDailyAnalytics,
+      loadWeeklyAnalytics,
+      loadMonthlyAnalytics,
+      createChart,
+      readTheme: readChartTheme,
     }),
   goals: (container) =>
     mountComingSoonPage(container, {

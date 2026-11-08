@@ -167,3 +167,106 @@ describe('createDataView', () => {
     expect(unsubscribe).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('createDataView: render results with mounted and destroy hooks', () => {
+  it('runs mounted after the node is in the page', async () => {
+    let inPageAtMount = null;
+    const node = document.createElement('p');
+    node.className = 'ready';
+    const { view } = setup({
+      renderReady: () => ({
+        node,
+        mounted: () => {
+          inPageAtMount = container.contains(node);
+        },
+      }),
+    });
+
+    await view.refresh();
+    expect(inPageAtMount).toBe(true);
+  });
+
+  it('destroys the previous render before showing the next one', async () => {
+    const destroyed = [];
+    let count = 0;
+    const { view } = setup({
+      // Different data each time, because a silent refresh with identical data is skipped.
+      load: vi.fn().mockResolvedValueOnce('first').mockResolvedValue('second'),
+      renderReady: () => {
+        const id = (count += 1);
+        return { node: renderReady(`r${id}`), destroy: () => destroyed.push(id) };
+      },
+    });
+
+    await view.refresh();
+    expect(destroyed).toEqual([]);
+    await view.refresh({ silent: true });
+    expect(destroyed).toEqual([1]);
+  });
+
+  it('destroys the render when replaced by a loading state, and on dispose', async () => {
+    const destroy = vi.fn();
+    const { view } = setup({ renderReady: () => ({ node: renderReady('x'), destroy }) });
+
+    await view.refresh();
+    const pending = view.refresh(); // non-silent refresh shows the loading state first
+    expect(destroy).toHaveBeenCalledTimes(1);
+    await pending;
+
+    view.dispose();
+    expect(destroy).toHaveBeenCalledTimes(2);
+  });
+
+  it('still accepts a plain Node from renderReady', async () => {
+    const { view } = setup();
+    await view.refresh();
+    expect(container.querySelector('.ready')).not.toBeNull();
+  });
+});
+
+describe('createDataView: flushFirst and unchanged refreshes', () => {
+  it('flushFirst flushes, then draws exactly once on start', async () => {
+    const draws = vi.fn(renderReady);
+    const { deps, view } = setup({ renderReady: draws, flushFirst: true });
+
+    await view.start();
+
+    expect(deps.requestLiveFlush).toHaveBeenCalledTimes(1);
+    expect(deps.load).toHaveBeenCalledTimes(1);
+    expect(draws).toHaveBeenCalledTimes(1);
+    expect(deps.subscribe).toHaveBeenCalled();
+    view.dispose();
+  });
+
+  it('a silent refresh with identical data does not redraw', async () => {
+    const draws = vi.fn(renderReady);
+    const { view } = setup({ renderReady: draws, load: vi.fn(async () => ({ total: 5 })) });
+
+    await view.refresh();
+    await view.refresh({ silent: true });
+    await view.refresh({ silent: true });
+
+    expect(draws).toHaveBeenCalledTimes(1);
+  });
+
+  it('a silent refresh with different data does redraw', async () => {
+    const draws = vi.fn(renderReady);
+    const load = vi.fn().mockResolvedValueOnce({ total: 5 }).mockResolvedValue({ total: 6 });
+    const { view } = setup({ renderReady: draws, load });
+
+    await view.refresh();
+    await view.refresh({ silent: true });
+
+    expect(draws).toHaveBeenCalledTimes(2);
+  });
+
+  it('a normal (non-silent) refresh always redraws, even with identical data', async () => {
+    const draws = vi.fn(renderReady);
+    const { view } = setup({ renderReady: draws, load: vi.fn(async () => ({ total: 5 })) });
+
+    await view.refresh();
+    await view.refresh();
+
+    expect(draws).toHaveBeenCalledTimes(2);
+  });
+});

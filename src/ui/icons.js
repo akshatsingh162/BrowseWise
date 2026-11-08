@@ -1,8 +1,11 @@
 import {
+  Activity,
   ArrowDownRight,
   ArrowUpRight,
   CalendarDays,
   ChartColumn,
+  ChevronLeft,
+  ChevronRight,
   Clock,
   ExternalLink,
   Globe,
@@ -15,6 +18,7 @@ import {
   ShieldCheck,
   Target,
   Trophy,
+  TrendingUp,
   TriangleAlert,
   createElement,
 } from 'lucide';
@@ -24,10 +28,13 @@ import {
  * of the library. To add an icon: import it above and register it here.
  */
 const ICONS = {
+  activity: Activity,
   'arrow-down-right': ArrowDownRight,
   'arrow-up-right': ArrowUpRight,
   'calendar-days': CalendarDays,
   'chart-column': ChartColumn,
+  'chevron-left': ChevronLeft,
+  'chevron-right': ChevronRight,
   clock: Clock,
   'external-link': ExternalLink,
   globe: Globe,
@@ -40,6 +47,7 @@ const ICONS = {
   'shield-check': ShieldCheck,
   target: Target,
   trophy: Trophy,
+  'trending-up': TrendingUp,
   'triangle-alert': TriangleAlert,
 };
 

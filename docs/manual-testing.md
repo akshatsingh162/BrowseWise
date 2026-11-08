@@ -99,3 +99,75 @@ Open it from the popup's **Open dashboard** button.
 | D13 | Narrow window      | Drag the window narrower than about 800 px                                                       | Sidebar becomes a top bar, list stays readable, no sideways page scroll                        |
 | D14 | Favicons           | Check icons in the lists                                                                         | Real icons for visited sites, a neutral globe otherwise                                        |
 | D15 | Network silence    | In dashboard DevTools open **Network** and reload                                                | Only `chrome-extension://` requests                                                            |
+
+## Sample data (optional, for testing charts)
+
+Weekly and monthly charts need weeks of history. This snippet fills only the days that currently have **no record** (it never touches real days) and remembers exactly which keys it created, so the cleanup removes only those. Run it in the service worker console:
+
+```js
+(async () => {
+  const sites = ['github.com', 'youtube.com', 'wikipedia.org', 'stackoverflow.com', 'claude.ai'];
+  const existing = await chrome.storage.local.get(null);
+  const created = [];
+  const updates = {};
+  const today = new Date();
+  for (let i = 1; i <= 90; i += 1) {
+    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+    const key = 'usage:' + d.toLocaleDateString('en-CA');
+    if (existing[key] || Math.random() < 0.2) continue;
+    const hourlyMs = new Array(24).fill(0);
+    const domainMs = {};
+    for (let h = 8; h < 23; h += 1) {
+      if (Math.random() < 0.35) continue;
+      const ms = Math.round((5 + Math.random() * 40) * 60000);
+      hourlyMs[h] = ms;
+      const site = sites[Math.floor(Math.random() * sites.length)];
+      domainMs[site] = (domainMs[site] ?? 0) + ms;
+    }
+    updates[key] = { date: key.slice(6), hourlyMs, domainMs };
+    created.push(key);
+  }
+  await chrome.storage.local.set({ ...updates, devSampleKeys: created });
+  console.log('Created sample data for', created.length, 'days');
+})();
+```
+
+Remove the sample data when you are done:
+
+```js
+chrome.storage.local.get('devSampleKeys').then(async ({ devSampleKeys = [] }) => {
+  await chrome.storage.local.remove([...devSampleKeys, 'devSampleKeys']);
+  console.log('Removed', devSampleKeys.length, 'sample days');
+});
+```
+
+## Analytics (Phase 5)
+
+Open the dashboard and choose **Analytics**. Use the sample data above for tests A5 to A9.
+
+| #   | Test            | Steps                                                                                | Expected                                                                                            |
+| --- | --------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| A1  | Daily view      | Open Analytics with some browsing recorded today                                     | "Today", four stat cards, an hourly bar chart, and a website list. Bars add up to roughly the total |
+| A2  | Tooltips        | Hover the hourly bars                                                                | Tooltip shows the hour range (for example 2 PM – 3 PM) and the exact duration                       |
+| A3  | Day navigation  | Click the left arrow, the right arrow, and **Today**                                 | Label reads Yesterday, then a full date; the right arrow and **Today** are disabled while on today  |
+| A4  | Empty day       | Step back to a day before you installed BrowseWise                                   | "No browsing time on this day", no empty charts                                                     |
+| A5  | Weekly          | Click **Weekly**                                                                     | Grouped bars (last 7 days and previous 7 days), a legend, four cards, a "Most used this week" list  |
+| A6  | Weekly tooltip  | Hover a weekday                                                                      | Tooltip lists both bars, each with its own date                                                     |
+| A7  | Click a bar     | Click any bar in the weekly chart, including a muted previous-week bar               | Switches to Daily showing exactly that day; **Daily** is highlighted                                |
+| A8  | Monthly         | Click **Monthly**                                                                    | A 30-day line, a six-month bar chart with the current month lighter, a website list                 |
+| A9  | Monthly details | Hover the current month's bar; click a point on the line                             | Tooltip says "so far" and shows active days; the click opens that day                               |
+| A10 | Responsive      | Resize the window from wide to narrow                                                | Charts resize with it, nothing overflows sideways                                                   |
+| A11 | No flicker      | Stay on a chart for a minute while doing nothing                                     | The chart does not redraw or flash                                                                  |
+| A12 | Live update     | Browse another site for two minutes, then switch back to the Analytics tab           | Numbers and charts have caught up                                                                   |
+| A13 | Reduced motion  | Turn off Windows animation effects (Settings, Accessibility, Visual effects), reload | Charts appear without animating                                                                     |
+| A14 | Accessible data | In DevTools Elements, find `table.bw-sr-only` inside each chart card                 | A hidden table holds the same numbers as the chart                                                  |
+| A15 | Keyboard        | Tab to the view buttons, day arrows, and **Today**, press Enter                      | Visible focus ring; everything works without a mouse                                                |
+| A16 | Network silence | Open DevTools Network and reload the dashboard                                       | Only `chrome-extension://` requests                                                                 |
+
+## Logo
+
+| #   | Test               | Steps                                                          | Expected                                                |
+| --- | ------------------ | -------------------------------------------------------------- | ------------------------------------------------------- |
+| L1  | Toolbar            | Look at the pinned toolbar icon (try a light and a dark theme) | The indigo "B" tile is clearly visible on both          |
+| L2  | Popup and sidebar  | Open the popup and the dashboard                               | Same logo in the popup header and the dashboard sidebar |
+| L3  | Tab and extensions | Look at the dashboard browser tab and `chrome://extensions`    | The logo appears on the tab and on the extension card   |
