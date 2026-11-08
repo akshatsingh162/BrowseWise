@@ -58,3 +58,22 @@ Restore the default afterwards by setting the value back to `60`.
 ### Midnight
 
 Covered by unit tests (including a randomised run across midnight). End-to-end verification is part of the Phase 9 hardening pass.
+
+## Popup (Phase 3)
+
+Open the popup by clicking the BrowseWise icon in the toolbar (pin it from the puzzle-piece menu first). Right-click inside the popup and choose **Inspect** to see its console.
+
+| #   | Test              | Steps                                                                                      | Expected                                                                                    |
+| --- | ----------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| P1  | Empty state       | Run `chrome.storage.local.clear()` in the worker console, reload the extension, open popup | "No browsing time yet today" with an icon; the button still works                           |
+| P2  | Live numbers      | Browse a site for 2 minutes, then open the popup                                           | Total and the site row include time up to the last few seconds (no 30 s lag)                |
+| P3  | Live updates      | Keep the popup open ~30 s while on a tracked page                                          | Numbers update on their own (refresh runs every 15 s)                                       |
+| P4  | Ranking           | Visit three sites for different lengths                                                    | Rows ordered most to least, percentages sensible, bars proportional                         |
+| P5  | Favicons          | Check the icons next to sites                                                              | Real favicons for visited sites; a neutral globe if none is available                       |
+| P6  | Top-5 limit       | Visit 6 or more sites                                                                      | Only 5 rows plus "+N more in the dashboard"                                                 |
+| P7  | Dashboard button  | Click **Open dashboard** (and the icon in the header)                                      | A tab opens with the placeholder page; clicking again focuses that tab instead of a new one |
+| P8  | Keyboard          | Press Tab repeatedly in the popup                                                          | A visible focus ring moves through the buttons; Enter activates them                        |
+| P9  | Hover tooltips    | Hover the comparison chip and a site's bar                                                 | Tooltips explain the comparison and the percentage                                          |
+| P10 | Popup vs. focus   | Watch whether total keeps growing while the popup is open                                  | Note what you see. Opening the popup may change window focus on your system (report it)     |
+| P11 | Network silence   | In popup DevTools open the **Network** tab, reload the popup                               | Only `chrome-extension://` requests; nothing to any website                                 |
+| P12 | Permission prompt | `chrome://extensions` → BrowseWise → Details → Permissions                                 | Note the exact wording Chrome shows (we expect the browsing-history line from `tabs`)       |

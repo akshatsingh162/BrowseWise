@@ -1,3 +1,4 @@
+import { MESSAGE_TYPES } from '../shared/messages.js';
 import { runMigrations } from '../shared/storage/migrations.js';
 import { STORAGE_KEYS } from '../shared/storage/schema.js';
 import { getSettings } from '../shared/storage/settings-repo.js';
@@ -123,4 +124,17 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     await applyIdleThreshold();
     await syncTracking({ now });
   });
+});
+
+// UI contexts (the popup) can ask for an up-to-the-second flush so the numbers they
+// display are not behind by up to one heartbeat.
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type !== MESSAGE_TYPES.GET_LIVE_SNAPSHOT) return false;
+  if (sender.id !== chrome.runtime.id) return false;
+
+  const now = Date.now();
+  void enqueue('live snapshot', () => syncTracking({ now })).then(() => {
+    sendResponse({ ok: true });
+  });
+  return true; // keep the message channel open for the async response
 });
