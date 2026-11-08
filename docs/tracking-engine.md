@@ -53,3 +53,4 @@ The worker can be stopped at any time. No tracking state lives in memory: each e
 - **Setting changes** are applied to the interval since the previous event, so the effect can be retroactive by up to one heartbeat.
 - **Subdomains are separate rows** (`mail.google.com` and `docs.google.com`).
 - **DevTools windows** are not tracked as websites.
+- **Opening the BrowseWise popup pauses tracking.** Chrome moves focus to the popup (observed on Windows), so time spent reading BrowseWise is not credited to the page underneath. Tracking resumes when the popup closes.
