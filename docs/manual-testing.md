@@ -77,3 +77,25 @@ Open the popup by clicking the BrowseWise icon in the toolbar (pin it from the p
 | P10 | Popup vs. focus   | Watch whether total keeps growing while the popup is open                                  | Note what you see. Opening the popup may change window focus on your system (report it)     |
 | P11 | Network silence   | In popup DevTools open the **Network** tab, reload the popup                               | Only `chrome-extension://` requests; nothing to any website                                 |
 | P12 | Permission prompt | `chrome://extensions` → BrowseWise → Details → Permissions                                 | Note the exact wording Chrome shows (we expect the browsing-history line from `tabs`)       |
+
+## Dashboard (Phase 4)
+
+Open it from the popup's **Open dashboard** button.
+
+| #   | Test               | Steps                                                                                            | Expected                                                                                       |
+| --- | ------------------ | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| D1  | Opens once         | Click **Open dashboard** twice from the popup                                                    | One dashboard tab; the second click focuses it                                                 |
+| D2  | Navigation         | Click each of the five sidebar items, then use the browser Back and Forward buttons              | Page changes, address ends in `#overview`, `#analytics`, etc., highlight follows, Back works   |
+| D3  | Deep link / reload | On `#websites` press F5                                                                          | Stays on Websites                                                                              |
+| D4  | Overview numbers   | Compare Overview with the popup                                                                  | Total, website count, and most-used site agree (within a few seconds)                          |
+| D5  | Live update        | Leave the dashboard open, browse another site for a minute in a different tab, switch back       | Numbers have caught up without reloading                                                       |
+| D6  | Comparison tooltip | Hover the line under the total                                                                   | Tooltip explains the comparison with yesterday                                                 |
+| D7  | Ranges             | On Websites click **Today**, **7 days**, **30 days**                                             | List reloads; multi-day summary reads "across N of 7 days" (or 30); the selected button is lit |
+| D8  | Filter             | Type part of a domain                                                                            | Only matches remain, rank numbers keep their original values; clearing restores the list       |
+| D9  | Filter focus       | Type in the filter box and keep typing for 30 s or more                                          | The box never loses focus or text when data refreshes                                          |
+| D10 | Empty state        | Run `chrome.storage.local.clear()` in the worker console and reload the extension, open Websites | "No browsing time recorded" message; Overview shows zeros and "—" without errors               |
+| D11 | Placeholder pages  | Open Analytics, Goals & limits, Settings                                                         | Each shows a heading and "Coming soon", nothing broken                                         |
+| D12 | Keyboard           | Tab through the sidebar and page controls; press Enter on a nav item                             | Visible focus ring everywhere; after navigating, focus moves into the page                     |
+| D13 | Narrow window      | Drag the window narrower than about 800 px                                                       | Sidebar becomes a top bar, list stays readable, no sideways page scroll                        |
+| D14 | Favicons           | Check icons in the lists                                                                         | Real icons for visited sites, a neutral globe otherwise                                        |
+| D15 | Network silence    | In dashboard DevTools open **Network** and reload                                                | Only `chrome-extension://` requests                                                            |
