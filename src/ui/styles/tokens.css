@@ -1,0 +1,62 @@
+/*
+ * Design tokens: the only place raw colours, sizes and timings are defined.
+ * Components reference these variables, so the whole look can be re-themed here.
+ * Dark-first. All text/background pairs below meet WCAG AA (4.5:1).
+ */
+:root {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --bw-bg: #0e0f12;
+  --bw-surface: #15171c;
+  --bw-surface-raised: #1b1e24;
+  --bw-surface-hover: #20232a;
+
+  /* Borders */
+  --bw-border: #262a31;
+  --bw-border-subtle: #1f2329;
+
+  /* Text (contrast on --bw-surface: 14.9 / 6.9 / 5.3) */
+  --bw-text: #e8eaee;
+  --bw-text-muted: #9aa1ad;
+  --bw-text-faint: #858c99;
+
+  /* One accent colour */
+  --bw-accent: #7c6cf0;
+  --bw-accent-strong: #6d5de6; /* button background; white text = 4.8:1 */
+  --bw-accent-strong-hover: #5f4fdb;
+  --bw-accent-text: #a79df7; /* accent used as text; 7.5:1 on surface */
+  --bw-accent-soft: rgba(124, 108, 240, 0.14);
+  --bw-on-accent: #ffffff;
+
+  /* Semantic */
+  --bw-danger: #f87171;
+  --bw-warning: #f5a524;
+
+  /* Typography */
+  --bw-font:
+    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --bw-text-xs: 11px;
+  --bw-text-sm: 12px;
+  --bw-text-base: 13px;
+  --bw-text-md: 15px;
+  --bw-text-display: 34px;
+
+  /* Spacing (4px scale) */
+  --bw-space-1: 4px;
+  --bw-space-2: 8px;
+  --bw-space-3: 12px;
+  --bw-space-4: 16px;
+  --bw-space-5: 20px;
+  --bw-space-6: 24px;
+
+  /* Shape */
+  --bw-radius-sm: 6px;
+  --bw-radius-md: 10px;
+  --bw-radius-lg: 14px;
+  --bw-shadow-card: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 8px 24px rgba(0, 0, 0, 0.28);
+
+  /* Motion (restrained; disabled for users who prefer reduced motion) */
+  --bw-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --bw-duration: 160ms;
+}
