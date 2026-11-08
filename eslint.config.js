@@ -27,12 +27,12 @@ export default [
   },
 
   {
-    // Tests and tool configs run in Node.
+    // Tests and tool configs run in Node. UI tests also use jsdom, which provides browser globals.
     files: ['tests/**/*.js', '*.config.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
-      globals: { ...globals.node },
+      globals: { ...globals.node, ...globals.browser },
     },
   },
 
