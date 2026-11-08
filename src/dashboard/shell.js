@@ -28,7 +28,7 @@ export function createShell(root) {
         el('div', { class: 'db-brand' }, [
           el('img', {
             class: 'db-logo',
-            src: chrome.runtime.getURL('icons/icon-32.png'),
+            src: chrome.runtime.getURL('icons/logo.svg'),
             alt: '',
             width: 24,
             height: 24,

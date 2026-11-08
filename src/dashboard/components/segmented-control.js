@@ -9,7 +9,8 @@ import { el } from '../../ui/dom.js';
  * @param {{id: string, label: string}[]} options.options
  * @param {string} options.value currently selected id
  * @param {(id: string) => void} options.onChange
- * @returns {HTMLElement}
+ * @returns {HTMLElement & {select: (id: string) => void}} `select` updates the highlighted
+ *          option without calling onChange
  */
 export function segmentedControl({ label, options, value, onChange }) {
   const group = el('div', { class: 'bw-segmented', role: 'group', 'aria-label': label });
@@ -35,5 +36,6 @@ export function segmentedControl({ label, options, value, onChange }) {
       }),
     );
   }
+  group.select = select;
   return group;
 }
