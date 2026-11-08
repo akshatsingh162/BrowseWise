@@ -1,6 +1,6 @@
-import { faviconUrl } from '../shared/favicon.js';
 import { describeComparison, formatDuration, formatPercent } from '../shared/format.js';
 import { el } from '../ui/dom.js';
+import { createFavicon } from '../ui/favicon-image.js';
 import { icon } from '../ui/icons.js';
 
 /**
@@ -60,20 +60,6 @@ function renderFooter({ onOpenDashboard }) {
   ]);
 }
 
-function renderFavicon(domain) {
-  const img = el('img', {
-    class: 'pp-favicon',
-    src: faviconUrl(domain, 32),
-    alt: '',
-    width: 16,
-    height: 16,
-    loading: 'lazy',
-  });
-  // If Chrome has no icon for the site, fall back to a neutral globe.
-  img.addEventListener('error', () => img.replaceWith(icon('globe', { size: 16 })), { once: true });
-  return img;
-}
-
 function renderHero(overview) {
   const comparison = describeComparison(overview.comparison);
 
@@ -105,7 +91,7 @@ function renderHero(overview) {
 function renderSiteRow(site) {
   const percent = formatPercent(site.share);
   return el('li', { class: 'pp-site' }, [
-    renderFavicon(site.domain),
+    createFavicon(site.domain, { className: 'pp-favicon' }),
     el('span', { class: 'pp-site-name pp-truncate', text: site.domain, title: site.domain }),
     el('span', { class: 'pp-site-time bw-num' }, [
       formatDuration(site.ms),
