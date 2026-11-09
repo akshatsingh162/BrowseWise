@@ -32,6 +32,17 @@
   /* Charts: a neutral series for comparisons (e.g. the previous period) */
   --bw-chart-muted: #3b4150;
 
+  /* Category colours: muted hues, always shown beside a text label (never colour alone) */
+  --bw-cat-education: #4fb8a6;
+  --bw-cat-social: #e08fb8;
+  --bw-cat-entertainment: #e5a14e;
+  --bw-cat-development: #8f81f5;
+  --bw-cat-productivity: #7cc47a;
+  --bw-cat-shopping: #e07b5f;
+  --bw-cat-news: #9fb4cc;
+  --bw-cat-communication: #5ab4e6;
+  --bw-cat-other: #77808f;
+
   /* Semantic */
   --bw-danger: #f87171;
   --bw-warning: #f5a524;

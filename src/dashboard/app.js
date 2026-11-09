@@ -1,4 +1,5 @@
 import { requestLiveFlush } from '../shared/live-flush.js';
+import { setCategoryOverride } from '../shared/storage/category-repo.js';
 import { subscribeToUsageChanges } from '../shared/usage-events.js';
 import { loadDailyAnalytics, loadMonthlyAnalytics, loadWeeklyAnalytics } from './analytics-data.js';
 import { createChart } from './charts/chart-factory.js';
@@ -19,7 +20,8 @@ const liveDeps = {
 /** Each page mounts itself into the container and returns { unmount }. */
 const PAGES = {
   overview: (container) => mountOverviewPage(container, { ...liveDeps, loadOverviewData }),
-  websites: (container) => mountWebsitesPage(container, { ...liveDeps, loadWebsiteUsage }),
+  websites: (container) =>
+    mountWebsitesPage(container, { ...liveDeps, loadWebsiteUsage, setCategoryOverride }),
   analytics: (container) =>
     mountAnalyticsPage(container, {
       ...liveDeps,

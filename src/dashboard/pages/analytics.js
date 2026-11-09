@@ -12,6 +12,7 @@ import {
   weeklyChartConfig,
 } from '../charts/chart-configs.js';
 import { chartCard } from '../components/chart-card.js';
+import { categoryPanel } from '../components/category-panel.js';
 import { createDataView } from '../components/data-view.js';
 import { pageHeader } from '../components/page-header.js';
 import { segmentedControl } from '../components/segmented-control.js';
@@ -31,7 +32,8 @@ const COMPARISON_TOOLTIP = 'Includes today so far, which is not yet a full day.'
 const textValue = (text) => el('span', { class: 'db-stat-text', text });
 
 /** Combines cards and chart cards into one page result for the data view. */
-function assemble(parts) {
+function assemble(allParts) {
+  const parts = allParts.filter(Boolean);
   const charts = parts.filter((part) => part.element);
   return {
     node: el(
@@ -160,6 +162,7 @@ export function mountAnalyticsPage(
         }),
       ]),
       hourly,
+      categoryPanel({ sites: data.ranked, overrides: data.overrides ?? {} }),
       websitePanel({
         title: data.isToday ? 'Websites today' : 'Websites on this day',
         ranked: data.ranked,
@@ -212,6 +215,7 @@ export function mountAnalyticsPage(
         comparisonCard(data.comparison, data.previousMs, 'previous 7 days'),
       ]),
       weekly,
+      categoryPanel({ sites: data.ranked, overrides: data.overrides ?? {} }),
       websitePanel({ title: 'Most used this week', ranked: data.ranked }),
     ]);
   }
@@ -265,6 +269,7 @@ export function mountAnalyticsPage(
       ]),
       trend,
       months,
+      categoryPanel({ sites: data.ranked, overrides: data.overrides ?? {} }),
       websitePanel({ title: 'Most used in the last 30 days', ranked: data.ranked }),
     ]);
   }

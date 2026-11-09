@@ -2,6 +2,7 @@ import { describeComparison, formatDuration, formatPercent } from '../../shared/
 import { el } from '../../ui/dom.js';
 import { createFavicon } from '../../ui/favicon-image.js';
 import { icon } from '../../ui/icons.js';
+import { categoryPanel } from '../components/category-panel.js';
 import { createDataView } from '../components/data-view.js';
 import { pageHeader } from '../components/page-header.js';
 import { statCard } from '../components/stat-card.js';
@@ -108,6 +109,16 @@ function topWebsitesCard({ overview }) {
   ]);
 }
 
+/** Top websites, with the category breakdown beside them when there is time to show. */
+function overviewLower(data) {
+  const categories = categoryPanel({
+    sites: data.overview.ranked,
+    overrides: data.overrides ?? {},
+  });
+  const topWebsites = topWebsitesCard(data);
+  return categories ? el('div', { class: 'db-split' }, [topWebsites, categories]) : topWebsites;
+}
+
 /**
  * Mounts the Overview page into `container`.
  *
@@ -145,7 +156,7 @@ export function mountOverviewPage(
           mostUsedCard(data),
           averageCard(data),
         ]),
-        topWebsitesCard(data),
+        overviewLower(data),
       ]),
   });
   void view.start();

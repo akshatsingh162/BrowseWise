@@ -37,3 +37,11 @@ Shared visual language for the popup and the dashboard. Everything lives in `src
 ## Font licence
 
 Inter is licensed under the SIL Open Font License 1.1. The licence text is kept in `src/ui/fonts/LICENSE-Inter.txt`.
+
+## Category colours
+
+Nine muted hues (`--bw-cat-*` in `tokens.css`) identify categories in the share bar and list. Each is at least 4.5:1 against the card surface (graphics need 3:1). Colour is never the only signal: every category also has a text label and a percentage, and the bar has a spoken summary.
+
+## Brand blue and the interface accent
+
+The logo uses brand blue (`#114f7b`). The interface accent is a separate indigo (`--bw-accent`). See `docs/branding.md`.

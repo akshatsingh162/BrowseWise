@@ -266,3 +266,32 @@
   color: var(--bw-text);
   box-shadow: 0 0 0 1px var(--bw-border);
 }
+
+/* Select (native dropdown, restyled) */
+.bw-select {
+  height: 32px;
+  max-width: 100%;
+  padding: 0 28px 0 var(--bw-space-3);
+  border: 1px solid var(--bw-border);
+  border-radius: var(--bw-radius-md);
+  background-color: var(--bw-surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239aa1ad' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 9px center;
+  background-repeat: no-repeat;
+  color: var(--bw-text);
+  font: inherit;
+  font-size: var(--bw-text-sm);
+  appearance: none;
+  cursor: pointer;
+  transition: border-color var(--bw-duration) var(--bw-ease);
+}
+
+.bw-select:hover {
+  border-color: #353a44;
+}
+
+.bw-select:focus-visible {
+  outline: 2px solid var(--bw-accent);
+  outline-offset: 1px;
+  border-color: var(--bw-accent);
+}
