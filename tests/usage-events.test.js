@@ -59,3 +59,13 @@ describe('subscribeToUsageChanges', () => {
     expect(listeners.size).toBe(0);
   });
 });
+
+describe('subscribeToUsageChanges: category overrides', () => {
+  it('also calls back when the user changes a category', () => {
+    const callback = vi.fn();
+    subscribeToUsageChanges(callback, { debounceMs: 10 });
+    fire({ categoryOverrides: { newValue: {} } });
+    vi.advanceTimersByTime(10);
+    expect(callback).toHaveBeenCalledTimes(1);
+  });
+});

@@ -26,7 +26,10 @@ export async function requestLiveFlush({
     await Promise.race([send({ type: MESSAGE_TYPES.GET_LIVE_SNAPSHOT }), timeout]);
     return true;
   } catch (error) {
-    console.warn('[BrowseWise] live flush unavailable', error);
+    // Expected now and then (the worker may be starting up, or the extension was just
+    // reloaded) and harmless: the screen shows what is already stored. Logged at debug
+    // level so it does not pile up in chrome://extensions as an "error".
+    console.debug('[BrowseWise] live flush unavailable', error);
     return false;
   } finally {
     clearTimeout(timer);
