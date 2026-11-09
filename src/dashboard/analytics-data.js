@@ -13,6 +13,7 @@ import {
 import { mergeDays } from '../shared/aggregate.js';
 import { shiftDateKey } from '../shared/dates.js';
 import { rankDomains, totalMs } from '../shared/stats.js';
+import { getCategoryOverrides } from '../shared/storage/category-repo.js';
 import { getUsageForRange } from '../shared/storage/usage-repo.js';
 import { toLocalDateKey } from '../shared/time.js';
 
@@ -25,11 +26,15 @@ export const MONTHS_SHOWN = 6;
  * @param {number} now epoch ms
  */
 export async function loadDailyAnalytics(dateKey, now) {
-  const [day] = await getUsageForRange([dateKey]);
+  const [[day], overrides] = await Promise.all([
+    getUsageForRange([dateKey]),
+    getCategoryOverrides(),
+  ]);
   const ranked = rankDomains(day);
 
   return {
     dateKey,
+    overrides,
     isToday: dateKey === toLocalDateKey(now),
     hourlyMs: day.hourlyMs,
     ranked,
@@ -49,7 +54,10 @@ export async function loadWeeklyAnalytics(now) {
   const currentKeys = dateKeysBetween(shiftDateKey(todayKey, -6), todayKey);
   const previousKeys = dateKeysBetween(shiftDateKey(todayKey, -13), shiftDateKey(todayKey, -7));
 
-  const days = await getUsageForRange([...previousKeys, ...currentKeys]);
+  const [days, overrides] = await Promise.all([
+    getUsageForRange([...previousKeys, ...currentKeys]),
+    getCategoryOverrides(),
+  ]);
   const previousDays = days.slice(0, 7);
   const currentDays = days.slice(7);
 
@@ -59,6 +67,7 @@ export async function loadWeeklyAnalytics(now) {
   const previousMs = sumTotals(previous);
 
   return {
+    overrides,
     current,
     previous,
     totalMs: currentMs,
@@ -80,7 +89,7 @@ export async function loadMonthlyAnalytics(now) {
   const months = calendarMonths(now, MONTHS_SHOWN);
   const keys = dateKeysBetween(months[0].startKey, todayKey);
 
-  const days = await getUsageForRange(keys);
+  const [days, overrides] = await Promise.all([getUsageForRange(keys), getCategoryOverrides()]);
   const totals = dayTotals(days);
 
   // Six calendar months always span well over 60 days, so both 30-day windows fit.
@@ -92,6 +101,7 @@ export async function loadMonthlyAnalytics(now) {
   const previousMs = sumTotals(previous);
 
   return {
+    overrides,
     current,
     previousMs,
     totalMs: currentMs,

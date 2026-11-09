@@ -166,8 +166,31 @@ Open the dashboard and choose **Analytics**. Use the sample data above for tests
 
 ## Logo
 
-| #   | Test               | Steps                                                          | Expected                                                |
-| --- | ------------------ | -------------------------------------------------------------- | ------------------------------------------------------- |
-| L1  | Toolbar            | Look at the pinned toolbar icon (try a light and a dark theme) | The indigo "B" tile is clearly visible on both          |
-| L2  | Popup and sidebar  | Open the popup and the dashboard                               | Same logo in the popup header and the dashboard sidebar |
-| L3  | Tab and extensions | Look at the dashboard browser tab and `chrome://extensions`    | The logo appears on the tab and on the extension card   |
+| #   | Test               | Steps                                                          | Expected                                                   |
+| --- | ------------------ | -------------------------------------------------------------- | ---------------------------------------------------------- |
+| L1  | Toolbar            | Look at the pinned toolbar icon (try a light and a dark theme) | The blue "bw" tile is clearly visible and readable on both |
+| L2  | Popup and sidebar  | Open the popup and the dashboard                               | Same logo in the popup header and the dashboard sidebar    |
+| L3  | Tab and extensions | Look at the dashboard browser tab and `chrome://extensions`    | The logo appears on the tab and on the extension card      |
+
+## Categories (Phase 6)
+
+| #   | Test                 | Steps                                                                                       | Expected                                                                                                       |
+| --- | -------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| C1  | Automatic categories | Open **Websites** after visiting github.com, youtube.com, and a few others                  | Every row has a category dropdown showing a sensible automatic choice (github.com: Development & Programming)  |
+| C2  | Unknown sites        | Look at a site that is not a household name                                                 | It shows **Other**, and nothing breaks                                                                         |
+| C3  | Change a category    | Change youtube.com to **Education**                                                         | The row updates instantly, a dot appears, and "Category saved for youtube.com." is announced                   |
+| C4  | Persistence          | Reload the dashboard, then close and reopen Chrome                                          | The change is still there                                                                                      |
+| C5  | Reset                | Open the dropdown on the changed row and choose **Reset to automatic**                      | The dot disappears and the automatic category returns                                                          |
+| C6  | Applies everywhere   | After changing a category, open **Overview** and **Analytics**                              | The "Time by category" figures reflect your change                                                             |
+| C7  | Category panel       | Open **Overview**                                                                           | Productive sites, Entertainment, and Social media show time and percentage; a bar and list show all categories |
+| C8  | Analytics panels     | Open **Analytics**: Daily, Weekly, Monthly                                                  | Each view has a "Time by category" panel for its own period                                                    |
+| C9  | Disclaimer           | Look for the note on the Overview, Analytics, and Websites pages                            | It says categories describe the website, not what you were doing                                               |
+| C10 | Category filter      | On **Websites** choose **Development & Programming** in the filter                          | Only matching rows remain; rank numbers keep their original values; the summary says "N of M websites"         |
+| C11 | Filter plus search   | Combine the category filter with the text filter                                            | Both apply together; a combination with no match shows a clear message                                         |
+| C12 | Keyboard             | Tab to a category dropdown, change it with the arrow keys                                   | It works without a mouse and keyboard focus stays on that dropdown afterwards                                  |
+| C13 | Local development    | Visit a local dev server such as http://localhost:3000                                      | It shows **Development & Programming**                                                                         |
+| C14 | Subdomains           | Visit gist.github.com and mail.google.com                                                   | gist.github.com is Development & Programming; mail.google.com is Communication                                 |
+| C15 | Exact-domain choices | Change github.com to Entertainment, then look at gist.github.com                            | gist.github.com keeps its automatic category                                                                   |
+| C16 | Two tabs             | Open the dashboard in two tabs, change a category in one                                    | The other tab updates itself within a second or so                                                             |
+| C17 | Narrow window        | Make the window narrower than about 800 px on the Websites page                             | Each row stays readable and the category dropdown drops onto its own line                                      |
+| C18 | Stored data          | In the worker console run `chrome.storage.local.get('categoryOverrides').then(console.log)` | Only domain-to-category pairs, nothing else                                                                    |

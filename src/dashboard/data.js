@@ -2,6 +2,7 @@ import { averageDailyMs, mergeDays } from '../shared/aggregate.js';
 import { shiftDateKey } from '../shared/dates.js';
 import { dateKeysForRange } from '../shared/range.js';
 import { buildOverview, rankDomains, totalMs } from '../shared/stats.js';
+import { getCategoryOverrides } from '../shared/storage/category-repo.js';
 import { getUsageForRange } from '../shared/storage/usage-repo.js';
 import { toLocalDateKey } from '../shared/time.js';
 
@@ -21,10 +22,14 @@ export async function loadOverviewData(now) {
     shiftDateKey(todayKey, -(index + 1)),
   );
 
-  const [today, ...previous] = await getUsageForRange([todayKey, ...previousKeys]);
+  const [[today, ...previous], overrides] = await Promise.all([
+    getUsageForRange([todayKey, ...previousKeys]),
+    getCategoryOverrides(),
+  ]);
   return {
     overview: buildOverview({ today, yesterday: previous[0], now }),
     average: averageDailyMs(previous),
+    overrides,
   };
 }
 
@@ -36,11 +41,12 @@ export async function loadOverviewData(now) {
  */
 export async function loadWebsiteUsage(rangeId, now) {
   const keys = dateKeysForRange(rangeId, now);
-  const days = await getUsageForRange(keys);
+  const [days, overrides] = await Promise.all([getUsageForRange(keys), getCategoryOverrides()]);
   const merged = mergeDays(days);
 
   return {
     rangeId,
+    overrides,
     ranked: rankDomains(merged),
     totalMs: totalMs(merged),
     dayCount: keys.length,
