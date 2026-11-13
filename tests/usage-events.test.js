@@ -40,8 +40,9 @@ describe('subscribeToUsageChanges', () => {
     const callback = vi.fn();
     subscribeToUsageChanges(callback, { debounceMs: 10 });
 
-    fire({ settings: {} });
+    fire({ meta: {} });
     fire({ 'tracker:state': {} });
+    fire({ limitNotices: {} });
     fire({ 'usage:2026-11-07': {} }, 'sync');
     vi.advanceTimersByTime(50);
     expect(callback).not.toHaveBeenCalled();
@@ -65,6 +66,16 @@ describe('subscribeToUsageChanges: category overrides', () => {
     const callback = vi.fn();
     subscribeToUsageChanges(callback, { debounceMs: 10 });
     fire({ categoryOverrides: { newValue: {} } });
+    vi.advanceTimersByTime(10);
+    expect(callback).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('subscribeToUsageChanges: goals and settings', () => {
+  it.each(['goals', 'settings'])('calls back when %s change', (key) => {
+    const callback = vi.fn();
+    subscribeToUsageChanges(callback, { debounceMs: 10 });
+    fire({ [key]: { newValue: {} } });
     vi.advanceTimersByTime(10);
     expect(callback).toHaveBeenCalledTimes(1);
   });

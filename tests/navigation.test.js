@@ -42,3 +42,32 @@ describe('openDashboard', () => {
     expect(chromeMock.tabs.create).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('openDashboard with a page', () => {
+  it('opens a new tab straight on that page', async () => {
+    chromeMock.tabs.query.mockResolvedValue([]);
+    await openDashboard('goals');
+    expect(chromeMock.tabs.create).toHaveBeenCalledWith({ url: `${DASHBOARD_URL}#goals` });
+  });
+
+  it('moves an open dashboard to that page and focuses it', async () => {
+    chromeMock.tabs.query.mockResolvedValue([
+      { id: 7, windowId: 3, url: `${DASHBOARD_URL}#overview` },
+    ]);
+    await openDashboard('goals');
+    expect(chromeMock.tabs.update).toHaveBeenCalledWith(7, {
+      active: true,
+      url: `${DASHBOARD_URL}#goals`,
+    });
+    expect(chromeMock.windows.update).toHaveBeenCalledWith(3, { focused: true });
+    expect(chromeMock.tabs.create).not.toHaveBeenCalled();
+  });
+
+  it('leaves an open dashboard on its current page when no page is given', async () => {
+    chromeMock.tabs.query.mockResolvedValue([
+      { id: 7, windowId: 3, url: `${DASHBOARD_URL}#analytics` },
+    ]);
+    await openDashboard();
+    expect(chromeMock.tabs.update).toHaveBeenCalledWith(7, { active: true });
+  });
+});
