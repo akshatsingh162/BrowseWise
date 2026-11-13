@@ -1,7 +1,11 @@
 import { MESSAGE_TYPES } from '../shared/messages.js';
+import { openDashboard } from '../shared/navigation.js';
+import { NOTIFICATION_PREFIX } from '../shared/notifier.js';
 import { runMigrations } from '../shared/storage/migrations.js';
 import { STORAGE_KEYS } from '../shared/storage/schema.js';
 import { getSettings } from '../shared/storage/settings-repo.js';
+import { reportFailure } from './errors.js';
+import { checkLimits } from './limits-monitor.js';
 import { syncTracking } from './sync.js';
 
 /**
@@ -25,15 +29,26 @@ let queue = Promise.resolve();
 
 /** Runs tasks strictly in arrival order. A failing task never blocks later ones. */
 function enqueue(label, task) {
-  queue = queue.then(task).catch((error) => {
-    console.error(`[BrowseWise] ${label} failed`, error);
-  });
+  queue = queue.then(task).catch((error) => reportFailure(label, error));
   return queue;
+}
+
+/**
+ * Records tracking, then checks goals and limits. The limit check is separate and
+ * guarded: if it fails, tracking has already been saved and nothing is lost.
+ */
+async function trackAndCheckLimits(request) {
+  await syncTracking(request);
+  try {
+    await checkLimits({ now: request.now });
+  } catch (error) {
+    reportFailure('limit check', error);
+  }
 }
 
 function track(label, options = {}) {
   const now = Date.now();
-  return enqueue(label, () => syncTracking({ now, ...options }));
+  return enqueue(label, () => trackAndCheckLimits({ now, ...options }));
 }
 
 /** Idle detection uses a global interval; make sure it matches the user's setting. */
@@ -133,8 +148,36 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (sender.id !== chrome.runtime.id) return false;
 
   const now = Date.now();
-  void enqueue('live snapshot', () => syncTracking({ now })).then(() => {
+  void enqueue('live snapshot', () => trackAndCheckLimits({ now })).then(() => {
     sendResponse({ ok: true });
   });
   return true; // keep the message channel open for the async response
 });
+
+// --- Notifications (optional permission) ------------------------------------
+//
+// chrome.notifications does not exist until the user grants the optional
+// "notifications" permission, so it must never be touched unguarded: doing so at the
+// top level would throw and stop the whole worker. The listener is registered at
+// startup if the API is already there, and again if the permission is granted while
+// the worker is running.
+
+let notificationHandlersRegistered = false;
+
+function handleNotificationClick(notificationId) {
+  if (!notificationId.startsWith(NOTIFICATION_PREFIX)) return;
+  chrome.notifications.clear(notificationId);
+  void openDashboard('goals').catch((error) => {
+    reportFailure('opening the dashboard from a notification', error);
+  });
+}
+
+function registerNotificationHandlers() {
+  const onClicked = chrome.notifications?.onClicked;
+  if (!onClicked || notificationHandlersRegistered) return;
+  notificationHandlersRegistered = true;
+  onClicked.addListener(handleNotificationClick);
+}
+
+registerNotificationHandlers();
+chrome.permissions?.onAdded?.addListener(registerNotificationHandlers);

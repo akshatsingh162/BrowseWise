@@ -16,10 +16,10 @@ BrowseWise measures how much active time you spend on each website and shows it 
 - A compact popup with live numbers
 - A dashboard with Overview, Websites, and Analytics (daily, weekly, and monthly charts)
 - Automatic website categories with manual overrides
+- A daily goal and per-website limits with optional notifications (BrowseWise only reminds you, it never blocks anything)
 
 ## Planned
 
-- Daily goals and per-website limits with optional notifications
 - Settings, history, CSV and JSON export, and one-click data deletion
 
 ## A note on what "screen time" means
@@ -32,6 +32,7 @@ BrowseWise measures **active browsing time**: time the Chrome window is focused,
 - [Dashboard architecture](docs/dashboard.md)
 - [Analytics](docs/analytics.md)
 - [Categories](docs/categories.md)
+- [Goals and limits](docs/goals.md)
 - [Permissions](docs/permissions.md)
 - [Design system](docs/design-system.md) and [branding](docs/branding.md)
 - [Manual testing](docs/manual-testing.md)

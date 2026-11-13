@@ -1,11 +1,25 @@
 import { requestLiveFlush } from '../shared/live-flush.js';
+import {
+  removeNotificationsPermission,
+  requestNotificationsPermission,
+} from '../shared/notifications-permission.js';
+import { showTestNotification } from '../shared/notifier.js';
 import { setCategoryOverride } from '../shared/storage/category-repo.js';
+import {
+  acknowledgeCurrentlyExceeded,
+  clearAllGoals,
+  setDailyGoal,
+  setSiteLimit,
+} from '../shared/storage/goals-repo.js';
+import { updateSettings } from '../shared/storage/settings-repo.js';
 import { subscribeToUsageChanges } from '../shared/usage-events.js';
 import { loadDailyAnalytics, loadMonthlyAnalytics, loadWeeklyAnalytics } from './analytics-data.js';
 import { createChart } from './charts/chart-factory.js';
 import { readChartTheme } from './charts/chart-theme.js';
+import { loadGoalsData } from './goals-data.js';
 import { loadOverviewData, loadWebsiteUsage } from './data.js';
 import { mountAnalyticsPage } from './pages/analytics.js';
+import { mountGoalsPage } from './pages/goals.js';
 import { mountComingSoonPage } from './pages/coming-soon.js';
 import { mountOverviewPage } from './pages/overview.js';
 import { mountWebsitesPage } from './pages/websites.js';
@@ -32,11 +46,17 @@ const PAGES = {
       readTheme: readChartTheme,
     }),
   goals: (container) =>
-    mountComingSoonPage(container, {
-      title: 'Goals & limits',
-      description: 'Set a daily goal and per-website limits.',
-      iconName: 'target',
-      text: 'Daily goals, per-website limits, and optional notifications will appear here.',
+    mountGoalsPage(container, {
+      ...liveDeps,
+      loadGoalsData,
+      setDailyGoal,
+      setSiteLimit,
+      clearAllGoals,
+      acknowledgeCurrentlyExceeded,
+      updateSettings,
+      requestNotificationsPermission,
+      removeNotificationsPermission,
+      showTestNotification,
     }),
   settings: (container) =>
     mountComingSoonPage(container, {
