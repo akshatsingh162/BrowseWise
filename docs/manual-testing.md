@@ -194,3 +194,48 @@ Open the dashboard and choose **Analytics**. Use the sample data above for tests
 | C16 | Two tabs             | Open the dashboard in two tabs, change a category in one                                    | The other tab updates itself within a second or so                                                             |
 | C17 | Narrow window        | Make the window narrower than about 800 px on the Websites page                             | Each row stays readable and the category dropdown drops onto its own line                                      |
 | C18 | Stored data          | In the worker console run `chrome.storage.local.get('categoryOverrides').then(console.log)` | Only domain-to-category pairs, nothing else                                                                    |
+
+## Goals and limits (Phase 7)
+
+Open the dashboard and choose **Goals & limits**.
+
+| #   | Test              | Steps                                                                                            | Expected                                                                                         |
+| --- | ----------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| G1  | Empty state       | Open the page with nothing set                                                                   | "No goals or limits yet"; **Remove all** and the test button are disabled; notifications are off |
+| G2  | Daily goal        | Enter 2 hours and 0 minutes and press **Save goal**                                              | "Daily goal saved: 2h 00m." and a progress bar for today appears                                 |
+| G3  | Progress          | Browse for a few minutes, then reopen or refresh the page                                        | The bar and "time left" reflect real use; the dashboard itself does not add time                 |
+| G4  | Validation        | Try 0 hours 2 minutes, 25 hours, 1 hour 60 minutes, and 1.5 hours                                | A clear message each time, red outline on the fields, nothing is saved                           |
+| G5  | Edit the goal     | Click the pencil on the goal row                                                                 | The form fills with the current value and focus moves to it; saving changes the goal             |
+| G6  | Website limit     | Add youtube.com with 30 minutes                                                                  | "Limit saved for youtube.com: 30m a day." and a row with a bar                                   |
+| G7  | Pasted address    | Paste a full address such as `https://www.youtube.com/watch?v=abc` as the website                | It is saved as `youtube.com`                                                                     |
+| G8  | Bad address       | Type `notawebsite`                                                                               | "That does not look like a website address."                                                     |
+| G9  | Suggestions       | Click the website box and look at the suggestions                                                | Your most-used sites from the last 30 days are offered                                           |
+| G10 | Update a limit    | Type a website that already has a limit                                                          | The button changes to **Update limit**                                                           |
+| G11 | Remove a limit    | Click the bin on a limit row                                                                     | "Limit removed for …" and the row disappears; other limits stay                                  |
+| G12 | Levels in words   | Look at a limit that is over 80%, and one that is passed                                         | Text says "N left" or "Over by N" or "Limit reached"; the bar colour changes as well             |
+| G13 | Remove everything | Press **Remove all goals and limits**, then try Cancel, Escape, and clicking outside             | Each cancels and removes nothing. Focus returns to the button                                    |
+| G14 | Confirm removal   | Press it again and choose **Remove all**                                                         | Everything is removed with a message                                                             |
+| G15 | Persistence       | Reload the dashboard, then restart Chrome                                                        | Goals and limits are still there                                                                 |
+| G16 | Typing survives   | Start typing a website and keep the page open for a minute                                       | Your typing is never wiped by background updates                                                 |
+| G17 | Keyboard          | Use only Tab, Enter, Space, and arrow keys                                                       | Every control works, with a visible focus ring; the switch toggles with Space                    |
+| G18 | Narrow window     | Make the window narrower than about 800 px                                                       | Forms wrap onto several lines and stay usable                                                    |
+| G19 | Two tabs          | Open the dashboard in two tabs and change a limit in one                                         | The other tab updates itself within a second or so                                               |
+| G20 | Stored data       | In the worker console run `chrome.storage.local.get(['goals','limitNotices']).then(console.log)` | Only the goal, limits in minutes, and the notification record                                    |
+
+## Notifications (Phase 7)
+
+| #   | Test                   | Steps                                                                                                     | Expected                                                                                         |
+| --- | ---------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| N1  | Permission is optional | Look at the permissions Chrome shows on `chrome://extensions` details **before** turning notifications on | No notifications permission yet. **Note exactly what it shows.**                                 |
+| N2  | Turn on                | Switch notifications on                                                                                   | Chrome shows a permission prompt. **Note its exact wording.** Allow it. The switch turns on      |
+| N3  | Decline                | Turn off, then on again and choose to block it                                                            | The switch stays off with "Chrome did not grant the permission, so notifications stay off."      |
+| N4  | Test notification      | With notifications on, press **Send a test notification**                                                 | A desktop notification appears. If not, check Focus assist and Chrome notifications in Windows   |
+| N5  | A limit is reached     | Set a **5 minute** limit on a site and keep that tab active for about 5 minutes (move the mouse)          | One notification: "<site> limit reached", within about 30 seconds of reaching it                 |
+| N6  | Only once              | Keep browsing the same site                                                                               | No second notification that day                                                                  |
+| N7  | Click it               | Click the notification                                                                                    | The dashboard opens (or focuses) on the Goals page                                               |
+| N8  | Raising the limit      | Raise that limit to 15 minutes and keep browsing past it                                                  | It notifies again once the new limit is reached                                                  |
+| N9  | Already over           | Set a limit lower than what you have already used today                                                   | No notification, and the row shows as reached                                                    |
+| N10 | Turning on while over  | Turn notifications off, go over a limit, then turn notifications on                                       | No notification for limits you have already passed                                               |
+| N11 | Daily goal             | Set a 5 minute daily goal on a day with little use, then browse past it                                   | A "Daily goal reached" notification                                                              |
+| N12 | Turn off               | Switch notifications off                                                                                  | The permission is removed (check `chrome://extensions` details) and no more notifications arrive |
+| N13 | Worker restart         | Close the worker DevTools, wait for it to go inactive, then reach a limit                                 | The notification still arrives                                                                   |

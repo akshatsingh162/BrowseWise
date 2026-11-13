@@ -10,9 +10,17 @@ BrowseWise requests only what its code uses today. Nothing is requested "just in
 | `alarms`   | Wake the service worker every 30 seconds to save progress.                       | Tracking engine heartbeat         |
 | `favicon`  | Show website icons from Chrome's own favicon cache.                              | Popup and dashboard lists         |
 
+## Optional permission
+
+| Permission      | Why it is needed                                             | When Chrome asks                      |
+| --------------- | ------------------------------------------------------------ | ------------------------------------- |
+| `notifications` | Show a desktop notification when a goal or limit is reached. | Only when you switch notifications on |
+
+It is declared under `optional_permissions`, so it is **not** requested at install and adds no install warning. BrowseWise removes it again when you switch notifications off.
+
 ## Deliberately not requested
 
-`history` / `browsingHistory`, host permissions (`<all_urls>`), `activeTab`, `scripting`, `webRequest`, `cookies`, `unlimitedStorage`, and `notifications` (requested later, only when the notifications feature ships).
+`history` / `browsingHistory`, host permissions (`<all_urls>`), `activeTab`, `scripting`, `webRequest`, `cookies`, `unlimitedStorage`.
 
 ## What Chrome shows at install
 

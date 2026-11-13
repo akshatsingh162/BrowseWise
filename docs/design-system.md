@@ -45,3 +45,9 @@ Nine muted hues (`--bw-cat-*` in `tokens.css`) identify categories in the share 
 ## Brand blue and the interface accent
 
 The logo uses brand blue (`#114f7b`). The interface accent is a separate indigo (`--bw-accent`). See `docs/branding.md`.
+
+## Switch, danger button, and progress levels
+
+- **Switch** (`.bw-switch`): a button with `role="switch"` and `aria-checked`, always paired with a text label.
+- **Danger button** (`.bw-btn-danger`): for destructive actions, which are always confirmed in a dialog.
+- **Progress levels:** the bar changes colour at 80% (warning) and at the limit (danger), but the state is always also written in words.
