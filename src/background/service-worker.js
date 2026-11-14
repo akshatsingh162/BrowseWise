@@ -1,11 +1,13 @@
+import { ERASE_SCOPES, eraseData, isEraseScope } from '../shared/data-erase.js';
 import { MESSAGE_TYPES } from '../shared/messages.js';
 import { openDashboard } from '../shared/navigation.js';
 import { NOTIFICATION_PREFIX } from '../shared/notifier.js';
 import { runMigrations } from '../shared/storage/migrations.js';
 import { STORAGE_KEYS } from '../shared/storage/schema.js';
 import { getSettings } from '../shared/storage/settings-repo.js';
-import { reportFailure } from './errors.js';
+import { errorMessage, reportFailure } from './errors.js';
 import { checkLimits } from './limits-monitor.js';
+import { runMaintenance } from './maintenance.js';
 import { syncTracking } from './sync.js';
 
 /**
@@ -34,8 +36,28 @@ function enqueue(label, task) {
 }
 
 /**
- * Records tracking, then checks goals and limits. The limit check is separate and
- * guarded: if it fails, tracking has already been saved and nothing is lost.
+ * Like enqueue, but for tasks whose outcome the caller needs (a message that must be
+ * answered). The task still runs in arrival order, between tracking tasks. The returned
+ * promise never rejects: it resolves to `{ ok: true }` or `{ ok: false, error }`.
+ */
+function enqueueWithResult(label, task) {
+  const result = queue.then(async () => {
+    try {
+      await task();
+      return { ok: true };
+    } catch (error) {
+      reportFailure(label, error);
+      return { ok: false, error: errorMessage(error) };
+    }
+  });
+  queue = result.then(() => {});
+  return result;
+}
+
+/**
+ * Records tracking, then checks goals and limits, then does housekeeping. The last two
+ * are separate and guarded: if either fails, tracking has already been saved and
+ * nothing is lost.
  */
 async function trackAndCheckLimits(request) {
   await syncTracking(request);
@@ -43,6 +65,16 @@ async function trackAndCheckLimits(request) {
     await checkLimits({ now: request.now });
   } catch (error) {
     reportFailure('limit check', error);
+  }
+  await maintain({ now: request.now });
+}
+
+/** Deletes days past the retention setting (at most once a day unless forced). */
+async function maintain(options) {
+  try {
+    await runMaintenance(options);
+  } catch (error) {
+    reportFailure('maintenance', error);
   }
 }
 
@@ -138,20 +170,55 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   enqueue('settings changed', async () => {
     await applyIdleThreshold();
     await syncTracking({ now });
+    // A shorter retention should take effect now, not at the next daily run.
+    await maintain({ now, force: true });
   });
 });
 
-// UI contexts (the popup) can ask for an up-to-the-second flush so the numbers they
-// display are not behind by up to one heartbeat.
+/**
+ * Erases data inside the task queue, so tracking cannot write halfway through.
+ *
+ * For history: the time since the last checkpoint is saved first, so it is erased too
+ * and cannot reappear afterwards as a stray few seconds. For everything: storage is
+ * cleared and the defaults rewritten, then the worker's own set-up is applied again
+ * and tracking starts afresh from now.
+ */
+async function eraseInWorker(scope, now) {
+  if (scope === ERASE_SCOPES.HISTORY) await syncTracking({ now });
+  await eraseData(scope);
+  if (scope === ERASE_SCOPES.EVERYTHING) {
+    await prepare();
+    await syncTracking({ now: Date.now() });
+  }
+}
+
+// UI contexts (the popup, the dashboard) talk to the worker through messages:
+//   GET_LIVE_SNAPSHOT  flush the in-progress interval so displayed numbers are current
+//   ERASE_DATA         erase history or everything, in order with tracking
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message?.type !== MESSAGE_TYPES.GET_LIVE_SNAPSHOT) return false;
   if (sender.id !== chrome.runtime.id) return false;
 
-  const now = Date.now();
-  void enqueue('live snapshot', () => trackAndCheckLimits({ now })).then(() => {
-    sendResponse({ ok: true });
-  });
-  return true; // keep the message channel open for the async response
+  if (message?.type === MESSAGE_TYPES.GET_LIVE_SNAPSHOT) {
+    const now = Date.now();
+    void enqueue('live snapshot', () => trackAndCheckLimits({ now })).then(() => {
+      sendResponse({ ok: true });
+    });
+    return true; // keep the message channel open for the async response
+  }
+
+  if (message?.type === MESSAGE_TYPES.ERASE_DATA) {
+    if (!isEraseScope(message.scope)) {
+      sendResponse({ ok: false, error: 'Unknown erase scope.' });
+      return false;
+    }
+    const now = Date.now();
+    void enqueueWithResult('erase data', () => eraseInWorker(message.scope, now)).then(
+      sendResponse,
+    );
+    return true;
+  }
+
+  return false;
 });
 
 // --- Notifications (optional permission) ------------------------------------
