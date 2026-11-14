@@ -372,3 +372,62 @@ describe('analytics page: interaction', () => {
     expect(table.querySelectorAll('tbody tr')).toHaveLength(2);
   });
 });
+
+describe('analytics page: opening a day from a link', () => {
+  const label = () => container.querySelector('.db-daynav-label').textContent;
+
+  it('opens the daily view on the day from the link', async () => {
+    const { deps } = mount({ initialDay: '2026-11-03' });
+    await settled();
+
+    expect(deps.loadDailyAnalytics).toHaveBeenCalledWith('2026-11-03', NOW);
+    expect(plain(label())).toBe('Tuesday, November 3, 2026');
+    expect(
+      container.querySelector('[aria-label="Time period"] [aria-pressed="true"]').textContent,
+    ).toBe('Daily');
+    // A past day: "Next day" works, "Today" lets the user jump back.
+    expect(container.querySelector('[aria-label="Next day"]').disabled).toBe(false);
+    expect(
+      [...container.querySelectorAll('button')].find((b) => b.textContent === 'Today').disabled,
+    ).toBe(false);
+  });
+
+  it('accepts today', async () => {
+    const { deps } = mount({ initialDay: TODAY });
+    await settled();
+    expect(deps.loadDailyAnalytics).toHaveBeenCalledWith(TODAY, NOW);
+    expect(label()).toBe('Today');
+  });
+
+  it('accepts yesterday and labels it', async () => {
+    mount({ initialDay: '2026-11-06' });
+    await settled();
+    expect(label()).toBe('Yesterday');
+  });
+
+  it.each([
+    ['a day in the future', '2026-11-08'],
+    ['a far-future day', '2099-01-01'],
+    ['a date that does not exist', '2026-02-31'],
+    ['the wrong format', '2026-1-5'],
+    ['text', 'yesterday'],
+    ['markup', '<img src=x onerror=alert(1)>'],
+    ['an empty value', ''],
+    ['nothing', undefined],
+  ])('ignores %s and shows today', async (_name, initialDay) => {
+    const { deps } = mount({ initialDay });
+    await settled();
+    expect(deps.loadDailyAnalytics).toHaveBeenCalledWith(TODAY, NOW);
+    expect(label()).toBe('Today');
+    expect(container.querySelectorAll('img[onerror]')).toHaveLength(0);
+  });
+
+  it('still lets the user move between days afterwards', async () => {
+    const { deps } = mount({ initialDay: '2026-11-03' });
+    await settled();
+    container.querySelector('[aria-label="Previous day"]').click();
+    await vi.waitFor(() =>
+      expect(deps.loadDailyAnalytics).toHaveBeenLastCalledWith('2026-11-02', NOW),
+    );
+  });
+});
