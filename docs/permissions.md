@@ -30,7 +30,27 @@ That wording comes from the `tabs` permission. BrowseWise never calls the Histor
 
 ## Data stored locally
 
-- Per day: seconds per domain and per hour of day.
-- Settings and the tracker's current state (domain in focus, idle state, last checkpoint time).
+All of it is in `chrome.storage.local`, on this device. Chrome limits that area to about 10 MB; BrowseWise does not request `unlimitedStorage`. Chrome removes it when the extension is uninstalled.
 
-Not stored: full URLs, page titles, page content, form inputs, passwords, or favicon images.
+| Key                 | Contents                                                                              |
+| ------------------- | ------------------------------------------------------------------------------------- |
+| `usage:YYYY-MM-DD`  | Per day: milliseconds per domain and per hour of day.                                 |
+| `settings`          | Idle threshold, two tracking switches, the notifications switch, and the retention.   |
+| `meta`              | The schema version, used for safe migrations.                                         |
+| `tracker:state`     | Domain in focus, idle state, and last checkpoint time, so tracking survives restarts. |
+| `categoryOverrides` | Domain-to-category pairs you chose.                                                   |
+| `goals`             | The daily goal and per-website limits.                                                |
+| `limitNotices`      | Which limits already sent a notification today.                                       |
+| `maintenance`       | The date the retention clean-up last ran.                                             |
+
+Not stored: full URLs, page titles, page content, form inputs, passwords, anything from Incognito windows, or favicon images.
+
+## Export needs no permission
+
+**Export JSON** and **Export CSV** build the file in the Settings page and hand it to the browser as a normal download (a `Blob` and a temporary link). No `downloads` permission is needed, and nothing is sent anywhere.
+
+## Deleting data
+
+**Clear history** and **Delete everything** (Settings → Your data) are described in [History, export, and data deletion](history-and-data.md). Deleting everything also removes the optional `notifications` permission, because the reset setting turns notifications off.
+
+See the [privacy policy](privacy-policy.md) for the user-facing wording.

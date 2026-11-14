@@ -2,7 +2,7 @@ import { formatDuration } from '../../shared/format.js';
 import { describePeriodComparison } from '../../shared/format-period.js';
 import { dayLong, dayShort, hourRange } from '../../shared/labels.js';
 import { toLocalDateKey } from '../../shared/time.js';
-import { shiftDateKey } from '../../shared/dates.js';
+import { isDateKey, shiftDateKey } from '../../shared/dates.js';
 import { el } from '../../ui/dom.js';
 import { icon } from '../../ui/icons.js';
 import {
@@ -74,6 +74,9 @@ function comparisonCard(comparison, previousMs, periodName) {
  * @param {(cb: () => void) => () => void} deps.subscribe
  * @param {() => number} [deps.now]
  * @param {string} [deps.locale]
+ * @param {string} [deps.initialDay] a YYYY-MM-DD day to open in the daily view, for links
+ *        such as #analytics?day=2026-11-07. Ignored unless it is a real date that is not
+ *        in the future.
  * @returns {{unmount: () => void}}
  */
 export function mountAnalyticsPage(
@@ -88,10 +91,13 @@ export function mountAnalyticsPage(
     subscribe,
     now = Date.now,
     locale,
+    initialDay,
   },
 ) {
   let mode = 'daily';
   let dateKey = toLocalDateKey(now());
+  // The value comes from the address bar, so it is checked before it is used.
+  if (isDateKey(initialDay) && initialDay <= dateKey) dateKey = initialDay;
   // Animate when the user changes what is shown, not on silent background refreshes.
   let animateNext = true;
 

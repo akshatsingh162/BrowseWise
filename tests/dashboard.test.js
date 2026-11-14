@@ -2,11 +2,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createBrowserMock } from './helpers/browser-mock.js';
 import { segmentedControl } from '../src/dashboard/components/segmented-control.js';
-import { mountComingSoonPage } from '../src/dashboard/pages/coming-soon.js';
 import { mountOverviewPage } from '../src/dashboard/pages/overview.js';
 import { mountWebsitesPage } from '../src/dashboard/pages/websites.js';
 import { ROUTES } from '../src/dashboard/router.js';
 import { createShell } from '../src/dashboard/shell.js';
+import { dayLong } from '../src/shared/labels.js';
 import { buildOverview, rankDomains, totalMs } from '../src/shared/stats.js';
 import { addUsage } from '../src/shared/storage/usage-repo.js';
 import { toLocalDateKey } from '../src/shared/time.js';
@@ -272,20 +272,6 @@ describe('websites page', () => {
   });
 });
 
-describe('coming-soon pages', () => {
-  it('render a heading and an honest placeholder', () => {
-    const page = mountComingSoonPage(container, {
-      title: 'Goals & limits',
-      description: 'desc',
-      iconName: 'target',
-      text: 'Will appear here.',
-    });
-    expect(container.querySelector('h1').textContent).toBe('Goals & limits');
-    expect(container.textContent).toContain('Coming soon');
-    expect(() => page.unmount()).not.toThrow();
-  });
-});
-
 describe('startDashboard (smoke test with the real wiring)', () => {
   let dashboard;
 
@@ -295,6 +281,7 @@ describe('startDashboard (smoke test with the real wiring)', () => {
     Object.assign(mock, {
       runtime: {
         getURL: (path) => `chrome-extension://abc/${path}`,
+        getManifest: () => ({ version: '0.1.0' }),
         sendMessage: vi.fn(async () => ({ ok: true })),
       },
     });
@@ -330,6 +317,52 @@ describe('startDashboard (smoke test with the real wiring)', () => {
     await vi.waitFor(() => expect(document.querySelector('h1').textContent).toBe('Goals & limits'));
     expect(document.querySelector('[aria-current="page"]').getAttribute('href')).toBe('#goals');
     expect(document.querySelector('.db-toolbar')).toBeNull();
+  });
+
+  it('shows the history page with the recorded day', async () => {
+    await boot('#history');
+    expect(document.querySelector('h1').textContent).toBe('History');
+    expect(document.querySelector('[aria-current="page"]').getAttribute('href')).toBe('#history');
+    await vi.waitFor(() => expect(document.querySelectorAll('.db-history-row')).toHaveLength(1));
+    expect(document.querySelector('.db-history-date').textContent).toBe('Today');
+    expect(document.querySelector('.db-history-row a').getAttribute('href')).toBe(
+      `#analytics?day=${toLocalDateKey(Date.now())}`,
+    );
+  });
+
+  it('shows the settings page with the stored history summary', async () => {
+    await boot('#settings');
+    expect(document.querySelector('h1').textContent).toBe('Settings');
+    await vi.waitFor(() => expect(document.querySelector('.db-facts')).not.toBeNull());
+    expect(document.querySelector('.db-fact dd').textContent).toBe('1');
+    expect(document.querySelector('#idle-seconds').value).toBe('60');
+    expect(document.querySelector('.db-version').textContent).toBe('BrowseWise 0.1.0');
+  });
+
+  it('opens the analytics page on the day named in the address', async () => {
+    await boot('#analytics?day=2026-11-01');
+    expect(document.querySelector('h1').textContent).toBe('Analytics');
+    expect(document.querySelector('.db-daynav-label').textContent).toBe(
+      dayLong('2026-11-01', undefined),
+    );
+    await vi.waitFor(() => expect(document.querySelector('.db-loading')).toBeNull());
+    expect(document.querySelector('.db-results').textContent).toContain(
+      'No browsing time on this day',
+    );
+  });
+
+  it('moves from the history page to a day in analytics through the link', async () => {
+    await boot('#history');
+    await vi.waitFor(() => expect(document.querySelector('.db-history-row a')).not.toBeNull());
+    const today = toLocalDateKey(Date.now());
+
+    window.location.hash = new URL(document.querySelector('.db-history-row a').href).hash;
+    await vi.waitFor(() => expect(document.querySelector('h1').textContent).toBe('Analytics'));
+    expect(document.querySelector('.db-daynav-label').textContent).toBe('Today');
+    await vi.waitFor(() =>
+      expect(document.querySelector('.db-stat-value')?.textContent).toBe('5m'),
+    );
+    expect(window.location.hash).toBe(`#analytics?day=${today}`);
   });
 
   it('falls back to the overview for an unknown hash', async () => {

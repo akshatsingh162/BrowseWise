@@ -1,16 +1,24 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { DEFAULT_ROUTE, ROUTES, createRouter, parseRoute } from '../src/dashboard/router.js';
+import {
+  DEFAULT_ROUTE,
+  ROUTES,
+  createRouter,
+  parseParams,
+  parseRoute,
+} from '../src/dashboard/router.js';
 
 describe('parseRoute', () => {
   it.each([
     ['#overview', 'overview'],
     ['#analytics', 'analytics'],
     ['#websites', 'websites'],
+    ['#history', 'history'],
     ['#goals', 'goals'],
     ['#settings', 'settings'],
     ['#/websites', 'websites'],
     ['#websites?range=7d', 'websites'],
+    ['#analytics?day=2026-11-07', 'analytics'],
     ['#websites/extra', 'websites'],
   ])('maps %s to %s', (hash, expected) => {
     expect(parseRoute(hash)).toBe(expected);
@@ -23,14 +31,37 @@ describe('parseRoute', () => {
     },
   );
 
-  it('knows exactly the five dashboard pages', () => {
+  it('knows exactly the six dashboard pages, in navigation order', () => {
     expect(ROUTES.map((route) => route.id)).toEqual([
       'overview',
       'analytics',
       'websites',
+      'history',
       'goals',
       'settings',
     ]);
+  });
+});
+
+describe('parseParams', () => {
+  it('reads the values after the question mark', () => {
+    expect(parseParams('#analytics?day=2026-11-07')).toEqual({ day: '2026-11-07' });
+    expect(parseParams('#websites?range=7d&q=a%20b')).toEqual({ range: '7d', q: 'a b' });
+  });
+
+  it.each(['', '#', '#analytics', '#analytics?', null, undefined])(
+    'returns no parameters for %s',
+    (hash) => {
+      expect(parseParams(hash)).toEqual({});
+    },
+  );
+
+  it('keeps hostile names as plain data and does not touch the prototype', () => {
+    const params = parseParams('#analytics?__proto__=x&constructor=y');
+    expect(Object.hasOwn(params, '__proto__')).toBe(true);
+    expect(Object.getPrototypeOf(params)).toBe(Object.prototype);
+    expect(params.constructor).toBe('y');
+    expect({}.x).toBeUndefined();
   });
 });
 
@@ -49,10 +80,20 @@ describe('createRouter', () => {
     const router = createRouter({ onNavigate });
 
     router.start();
-    expect(onNavigate).toHaveBeenLastCalledWith('websites');
+    expect(onNavigate).toHaveBeenLastCalledWith('websites', {});
 
     window.location.hash = '#settings';
-    await vi.waitFor(() => expect(onNavigate).toHaveBeenLastCalledWith('settings'));
+    await vi.waitFor(() => expect(onNavigate).toHaveBeenLastCalledWith('settings', {}));
+    router.stop();
+  });
+
+  it('passes the parameters along with the route', async () => {
+    window.location.hash = '#analytics?day=2026-11-07';
+    const onNavigate = vi.fn();
+    const router = createRouter({ onNavigate });
+
+    router.start();
+    expect(onNavigate).toHaveBeenLastCalledWith('analytics', { day: '2026-11-07' });
     router.stop();
   });
 

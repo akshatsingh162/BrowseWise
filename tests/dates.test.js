@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { shiftDateKey } from '../src/shared/dates.js';
+import { isDateKey, shiftDateKey } from '../src/shared/dates.js';
 
 describe('shiftDateKey', () => {
   it.each([
@@ -26,5 +26,32 @@ describe('shiftDateKey', () => {
     }
     expect(key).toBe('2026-12-31');
     expect(shiftDateKey(key, 1)).toBe('2027-01-01');
+  });
+});
+
+describe('isDateKey', () => {
+  it.each(['2026-11-07', '2028-02-29', '2026-12-31', '2026-01-01'])('accepts %s', (value) => {
+    expect(isDateKey(value)).toBe(true);
+  });
+
+  it.each([
+    '2026-02-29', // not a leap year
+    '2026-02-31',
+    '2026-13-01',
+    '2026-00-10',
+    '2026-11-00',
+    '2026-1-5',
+    '26-11-07',
+    '2026/11/07',
+    '2026-11-07T00:00',
+    ' 2026-11-07',
+    '',
+    null,
+    undefined,
+    20261107,
+    {},
+    '<script>',
+  ])('rejects %j', (value) => {
+    expect(isDateKey(value)).toBe(false);
   });
 });
