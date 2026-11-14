@@ -4,6 +4,8 @@ import {
   requestNotificationsPermission,
 } from '../shared/notifications-permission.js';
 import { showTestNotification } from '../shared/notifier.js';
+import { downloadTextFile } from '../shared/download.js';
+import { requestErase } from '../shared/data-erase.js';
 import { setCategoryOverride } from '../shared/storage/category-repo.js';
 import {
   acknowledgeCurrentlyExceeded,
@@ -18,11 +20,14 @@ import { createChart } from './charts/chart-factory.js';
 import { readChartTheme } from './charts/chart-theme.js';
 import { loadGoalsData } from './goals-data.js';
 import { loadOverviewData, loadWebsiteUsage } from './data.js';
+import { loadHistoryOverview, loadSiteHistory } from './history-data.js';
 import { mountAnalyticsPage } from './pages/analytics.js';
 import { mountGoalsPage } from './pages/goals.js';
-import { mountComingSoonPage } from './pages/coming-soon.js';
+import { mountHistoryPage } from './pages/history.js';
 import { mountOverviewPage } from './pages/overview.js';
+import { mountSettingsPage } from './pages/settings.js';
 import { mountWebsitesPage } from './pages/websites.js';
+import { collectExportData, countDaysToDelete, loadSettingsData } from './settings-data.js';
 import { ROUTES, createRouter } from './router.js';
 import { createShell } from './shell.js';
 
@@ -31,17 +36,29 @@ const liveDeps = {
   subscribe: subscribeToUsageChanges,
 };
 
-/** Each page mounts itself into the container and returns { unmount }. */
+/**
+ * Each page mounts itself into the container and returns { unmount }. `params` are the
+ * values after the question mark in the address, for example { day: '2026-11-07' }.
+ */
 const PAGES = {
   overview: (container) => mountOverviewPage(container, { ...liveDeps, loadOverviewData }),
   websites: (container) =>
     mountWebsitesPage(container, { ...liveDeps, loadWebsiteUsage, setCategoryOverride }),
-  analytics: (container) =>
+  analytics: (container, params) =>
     mountAnalyticsPage(container, {
       ...liveDeps,
       loadDailyAnalytics,
       loadWeeklyAnalytics,
       loadMonthlyAnalytics,
+      createChart,
+      readTheme: readChartTheme,
+      initialDay: params.day,
+    }),
+  history: (container) =>
+    mountHistoryPage(container, {
+      ...liveDeps,
+      loadHistoryOverview,
+      loadSiteHistory,
       createChart,
       readTheme: readChartTheme,
     }),
@@ -59,11 +76,15 @@ const PAGES = {
       showTestNotification,
     }),
   settings: (container) =>
-    mountComingSoonPage(container, {
-      title: 'Settings',
-      description: 'Preferences, data export, and privacy controls.',
-      iconName: 'settings',
-      text: 'Idle threshold, data export, and data deletion will appear here.',
+    mountSettingsPage(container, {
+      ...liveDeps,
+      loadSettingsData,
+      collectExportData,
+      countDaysToDelete,
+      updateSettings,
+      requestErase,
+      downloadTextFile,
+      removeNotificationsPermission,
     }),
 };
 
@@ -79,11 +100,11 @@ export function startDashboard(root) {
   let currentPage = null;
   let isFirstNavigation = true;
 
-  function navigate(routeId) {
+  function navigate(routeId, params) {
     currentPage?.unmount();
     shell.setActive(routeId);
     document.title = `${ROUTES.find((route) => route.id === routeId).label} \u00b7 BrowseWise`;
-    currentPage = PAGES[routeId](shell.main);
+    currentPage = PAGES[routeId](shell.main, params);
 
     // After a user-initiated navigation, move focus into the new page so keyboard and
     // screen-reader users land on the content. Skipped on first load.
