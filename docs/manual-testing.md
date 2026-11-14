@@ -239,3 +239,116 @@ Open the dashboard and choose **Goals & limits**.
 | N11 | Daily goal             | Set a 5 minute daily goal on a day with little use, then browse past it                                   | A "Daily goal reached" notification                                                              |
 | N12 | Turn off               | Switch notifications off                                                                                  | The permission is removed (check `chrome://extensions` details) and no more notifications arrive |
 | N13 | Worker restart         | Close the worker DevTools, wait for it to go inactive, then reach a limit                                 | The notification still arrives                                                                   |
+
+## History (Phase 8)
+
+Load the **sample data** from the helper section above first (about 70 days of history), then open the dashboard and choose **History**.
+
+| #   | Test            | Steps                                                               | Expected                                                                                              |
+| --- | --------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| H1  | Empty state     | On a fresh profile (or after **Clear history**), open **History**   | "No history yet" in Days and in Weeks                                                                 |
+| H2  | Days list       | With sample data, open **Days**                                     | Newest first; labels say Today / Yesterday / a short date; each row has a bar, a total and a top site |
+| H3  | Show more       | Scroll to the bottom                                                | "Showing 30 of N days" and a button. It adds more rows and the list keeps its place                   |
+| H4  | View link       | Click **View** on an older day                                      | **Analytics** opens in the daily view on exactly that day, with its charts                            |
+| H5  | Back button     | After H4 press the browser's Back button                            | You return to **History**                                                                             |
+| H6  | Weeks           | Open **Weeks**                                                      | Monday-to-Sunday rows, newest first; the current week says "This week"; totals match the days         |
+| H7  | Average wording | Look at a week where you were active on only some days              | "a day" average is over the active days only, and "N active days" is shown                            |
+| H8  | One website     | Open **One website**, type `github.com`, press **Show history**     | Four cards (Total time, Days visited, Average per visit day, Busiest day) and a trend chart           |
+| H9  | Suggestions     | Click the website box                                               | Your most-used sites are suggested                                                                    |
+| H10 | Pasted address  | Paste `https://www.YouTube.com/watch?v=abc`                         | The box shows `youtube.com` and its history loads                                                     |
+| H11 | Bad address     | Type `notawebsite`                                                  | "That does not look like a website address." and nothing loads                                        |
+| H12 | Ranges          | Switch between **30 days**, **90 days** and **1 year**              | The chart and cards change; the 1 year chart is readable (labels thin out)                            |
+| H13 | Chart click     | Click a point on the trend chart                                    | **Analytics** opens on that day                                                                       |
+| H14 | Never visited   | Search for a site you never used, such as `example.org`             | "No time on example.org" with an explanation                                                          |
+| H15 | Typing survives | Start typing a website and wait a minute (or browse in another tab) | Your typing is never wiped by refreshes                                                               |
+| H16 | Keyboard        | Use only Tab, Enter and Space on the whole page                     | Every control works, focus ring is visible, **Show more** keeps keyboard focus on its button          |
+| H17 | Narrow window   | Make the window narrower than about 800 px                          | Rows stay readable; bars are hidden; the top site drops onto its own line                             |
+| H18 | Two tabs        | Open the dashboard in two tabs, then **Clear history** in one       | The other tab's History empties by itself within a second or so                                       |
+
+## Analytics deep link (Phase 8)
+
+| #   | Test                 | Steps                                                                                      | Expected                                 |
+| --- | -------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------- |
+| A1  | Valid day            | Open `chrome-extension://<id>/src/dashboard/dashboard.html#analytics?day=` plus a past day | Analytics opens in **Daily** on that day |
+| A2  | Invalid day          | Try `#analytics?day=2026-02-31`, `#analytics?day=tomorrow`, and a future date              | Each opens on **Today**; nothing breaks  |
+| A3  | Already on Analytics | While on Analytics, change the hash in the address bar to another day and press Enter      | The page switches to that day            |
+
+## Settings (Phase 8)
+
+Open the dashboard and choose **Settings**.
+
+| #   | Test                  | Steps                                                                                                         | Expected                                                                                              |
+| --- | --------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| S1  | Layout                | Open **Settings**                                                                                             | Tracking, History, Notifications, Your data, Privacy, and the version line (`BrowseWise 0.1.0`)       |
+| S2  | Stored summary        | Look at **History**                                                                                           | Days recorded, the first and last date, and "Storage used … of about 10 MB". **Note the size shown.** |
+| S3  | Idle threshold        | Enter `120` and press **Save**                                                                                | "Idle threshold saved: 120 seconds." It is still 120 after a reload                                   |
+| S4  | Validation            | Try `10`, `3601`, `1.5`, an empty box                                                                         | A red message each time, nothing saved, and the text you typed is left as it was                      |
+| S5  | Idle really changes   | Set `15`, stop touching the mouse and keyboard for about 20 seconds with a site open, then check **Overview** | Time stops being counted after about 15 s of inactivity (plus up to one heartbeat)                    |
+| S6  | Sound switch          | Turn on **Count tabs playing sound as active**, play a video, and leave the mouse alone for 2 minutes         | Time keeps counting while the video plays                                                             |
+| S7  | Local sites switch    | Turn off **Track local websites**, visit `http://localhost:3000` (or any local address)                       | Nothing is recorded for it. Turn it on again and it is                                                |
+| S8  | Persistence           | Reload the dashboard, then restart Chrome                                                                     | All Settings values are still there                                                                   |
+| S9  | Notifications section | Look at **Notifications**                                                                                     | A status line and a link to **Goals & limits**; there is no switch on this page                       |
+| S10 | Keyboard              | Use only Tab, Enter, Space and arrow keys                                                                     | Every control works; switches toggle with Space                                                       |
+| S11 | Two tabs              | Change a value in one tab                                                                                     | The other tab shows it within a second or so                                                          |
+
+## History length (Phase 8)
+
+| #   | Test              | Steps                                                                                                        | Expected                                                                                                   |
+| --- | ----------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| R1  | Longer is silent  | Set **Keep history for** to 2 years                                                                          | Saved with no confirmation                                                                                 |
+| R2  | Shorter confirms  | With sample data, choose **30 days**                                                                         | A dialog says exactly how many days will be deleted ("permanently deletes N days"), with **Delete N days** |
+| R3  | Cancel            | In that dialog press **Cancel** (and repeat with Escape and a click outside)                                 | Nothing is deleted and the dropdown goes back to the previous value                                        |
+| R4  | Confirm           | Choose **30 days** again and confirm                                                                         | The days vanish right away; **History** and the summary update; N matches what was deleted                 |
+| R5  | Nothing to delete | Choose **90 days** after R4 (a longer value), then **30 days** again                                         | No dialog when no day is older than the limit                                                              |
+| R6  | Automatic pruning | Add an old day in the worker console (see below), wait for the next heartbeat or press a **Settings** change | Days older than the retention disappear without any click; today is never removed                          |
+
+For R6, in the worker console (replace the date with one older than your retention):
+
+```js
+chrome.storage.local.set({
+  'usage:2020-01-01': {
+    date: '2020-01-01',
+    hourlyMs: new Array(24).fill(60000),
+    domainMs: { 'old.example': 60000 },
+  },
+});
+```
+
+## Export (Phase 8)
+
+| #   | Test              | Steps                                                | Expected                                                                                                           |
+| --- | ----------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| X1  | JSON              | **Export JSON** with the range **All time**          | Chrome downloads `browsewise-usage-YYYY-MM-DD.json` (today's date). **Note where Chrome saved it.**                |
+| X2  | JSON content      | Open it in VS Code                                   | `app`, `exportFormat`, `appVersion`, `timeUnit: "milliseconds"`, `usage`, `categoryOverrides`, `goals`, `settings` |
+| X3  | CSV               | **Export CSV**                                       | Downloads `browsewise-usage-YYYY-MM-DD.csv`; header `date,domain,category,seconds`                                 |
+| X4  | CSV in Excel      | Double-click the CSV (Excel on Windows)              | Opens in columns with no garbled characters. **Report what Excel shows**                                           |
+| X5  | Categories        | Change a site's category on **Websites**, export CSV | That site's rows use your category                                                                                 |
+| X6  | Range             | Export **Last 30 days**                              | Only days from the last 30 are in the file (compare the first date)                                                |
+| X7  | Nothing to export | After **Clear history**, press either export button  | "There is no browsing data to export for this range." and no file is downloaded                                    |
+| X8  | Current to now    | Browse a site for a minute, then export at once      | The file includes the latest seconds (the page asks the worker to save first)                                      |
+| X9  | No permission     | Open `chrome://extensions` → BrowseWise → Details    | No "downloads" permission is listed, and the install warning is still only "Read your browsing history"            |
+
+## Deleting data (Phase 8)
+
+Export a copy first if you want to keep your sample data.
+
+| #   | Test                   | Steps                                                                                                                | Expected                                                                                                                         |
+| --- | ---------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | Cancel clear           | Press **Clear history…**, then Cancel, Escape, and click outside                                                     | Nothing is deleted; focus returns to the button                                                                                  |
+| D2  | Clear history          | Press it again and confirm                                                                                           | "History cleared."; History is empty; goals, limits, category choices and settings are all still there                           |
+| D3  | Does not come back     | Keep a site open for 30 seconds before pressing **Clear history…**, confirm, then watch **Overview**                 | Today starts again from about zero. The seconds before the clear do not reappear a few seconds later                             |
+| D4  | Cancel delete all      | Press **Delete everything…**, then Cancel                                                                            | Nothing changes                                                                                                                  |
+| D5  | Delete everything      | Press it again and confirm                                                                                           | "Everything was deleted…"; Goals page is empty, categories are back to automatic, Settings show the defaults (60 s idle, 1 year) |
+| D6  | Tracking resumes       | After D5 keep a site open for a minute                                                                               | New time is recorded from that moment                                                                                            |
+| D7  | Notifications released | Before D5 turn notifications on; after D5 look at `chrome://extensions` → Details                                    | The notifications permission is gone, and the Goals page shows notifications as off                                              |
+| D8  | Worker asleep          | Close the worker's DevTools window, wait until it says inactive, then **Clear history…**                             | It still works (Chrome wakes the worker for the message)                                                                         |
+| D9  | Worker path used       | In the dashboard page console run `chrome.runtime.sendMessage({type:'ERASE_DATA', scope:'bogus'}).then(console.log)` | `{ok: false, error: 'Unknown erase scope.'}` and nothing is deleted                                                              |
+| D10 | Uninstall              | Note the extension's ID, remove the extension, reinstall it from `dist/`                                             | A fresh install: no old history (Chrome removes extension storage on uninstall). **Report what you see**                         |
+
+## Privacy section (Phase 8)
+
+| #   | Test      | Steps                                                                             | Expected                                                                               |
+| --- | --------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| P1  | Wording   | Read **Privacy** on the Settings page                                             | Plain-language lists of what is stored and what is never stored                        |
+| P2  | Network   | Open DevTools → Network on the dashboard, use every page and every button         | No requests to any website (only `chrome-extension://` and Chrome's own favicon cache) |
+| P3  | Incognito | Allow BrowseWise in Incognito (`chrome://extensions` → Details), browse privately | Nothing from the private window is recorded                                            |

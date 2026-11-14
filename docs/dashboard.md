@@ -4,20 +4,20 @@ The dashboard is a single extension page (`src/dashboard/dashboard.html`) with a
 
 ## Structure
 
-| File                      | Role                                                                         |
-| ------------------------- | ---------------------------------------------------------------------------- |
-| `dashboard.js`            | Entry point. Loads styles and calls `startDashboard`.                        |
-| `app.js`                  | `startDashboard(root)`: builds the shell, routes pages, returns `{ stop }`.  |
-| `router.js`               | Route list, `parseRoute`, and a hash-change router.                          |
-| `shell.js`                | Sidebar navigation and the main content region.                              |
-| `data.js`                 | Loads and aggregates stored usage for each page.                             |
-| `components/data-view.js` | Loading, error, and ready states, live refresh, and out-of-order protection. |
-| `components/*`            | Stat card, usage list, segmented control, page header, state card.           |
-| `pages/*`                 | One module per page. Unbuilt pages use an honest "Coming soon" placeholder.  |
+| File                      | Role                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------ |
+| `dashboard.js`            | Entry point. Loads styles and calls `startDashboard`.                                |
+| `app.js`                  | `startDashboard(root)`: builds the shell, routes pages, returns `{ stop }`.          |
+| `router.js`               | Route list, `parseRoute`, `parseParams`, and a hash-change router.                   |
+| `shell.js`                | Sidebar navigation and the main content region.                                      |
+| `data.js`, `*-data.js`    | Load and aggregate stored usage for each page (history, settings, goals, analytics). |
+| `components/data-view.js` | Loading, error, and ready states, live refresh, and out-of-order protection.         |
+| `components/*`            | Stat card, usage list, segmented control, page header, state card.                   |
+| `pages/*`                 | One module per page: Overview, Analytics, Websites, History, Goals, Settings.        |
 
 ## Page contract
 
-A page is `mountXPage(container, deps)` and returns `{ unmount }`. The router calls `unmount` before mounting the next page, so timers and storage subscriptions never leak.
+A page is `mountXPage(container, deps)` and returns `{ unmount }`. Pages are given the values after a question mark in the address (`#analytics?day=2026-11-07`) as `params`, which `app.js` passes on (for example as the Analytics page's `initialDay`). Values from the address are untrusted and must be validated by the page. The router calls `unmount` before mounting the next page, so timers and storage subscriptions never leak.
 
 ## Data flow
 
@@ -41,7 +41,7 @@ Page controls (search box, range switch) live outside the data region, so refres
 
 ## Adding a page
 
-1. Add the route to `ROUTES` in `router.js` (with an icon registered in `src/ui/icons.js`).
+1. Add the route to `ROUTES` in `router.js` (with an icon registered in `src/ui/icons.js`). Order in `ROUTES` is the order in the sidebar.
 2. Create `pages/<name>.js` exporting `mount<Name>Page(container, deps)`.
 3. Register it in `PAGES` in `app.js`.
 
