@@ -4,17 +4,17 @@
  */
 
 const FALLBACK = {
-  accent: '#7c6cf0',
-  chartMuted: '#3b4150',
-  text: '#e8eaee',
-  textMuted: '#9aa1ad',
-  grid: '#1f2329',
-  tooltipBackground: '#1b1e24',
-  tooltipBorder: '#262a31',
-  fontFamily: "'Inter', system-ui, sans-serif",
+  accent: '#d6d6de',
+  chartMuted: '#3a3a43',
+  text: '#f3f3f6',
+  textMuted: '#b0b0ba',
+  grid: '#1c1c21',
+  tooltipBackground: '#18181c',
+  tooltipBorder: '#2a2a31',
+  fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
 };
 
-/** "#7c6cf0" + 0.55 -> "rgba(124, 108, 240, 0.55)". Non-hex input is returned unchanged. */
+/** "#d6d6de" + 0.55 -> "rgba(214, 214, 222, 0.55)". Non-hex input is returned unchanged. */
 export function withAlpha(color, alpha) {
   const match = /^#([0-9a-f]{6})$/i.exec(color);
   if (!match) return color;
@@ -29,7 +29,8 @@ export function readChartTheme(root = document.documentElement) {
   const style = getComputedStyle(root);
   const read = (name, fallback) => style.getPropertyValue(name).trim() || fallback;
 
-  const accent = read('--bw-accent', FALLBACK.accent);
+  // The chart series colour: its own token, so charts can be softer than buttons.
+  const accent = read('--bw-chart-accent', FALLBACK.accent);
   return {
     accent,
     accentDim: withAlpha(accent, 0.55),
