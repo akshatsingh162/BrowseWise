@@ -1,0 +1,254 @@
+/*
+ * Ambient background and depth effects, shared by the dashboard and the popup.
+ *
+ * Everything here is decoration. Nothing carries information, text never depends on
+ * it for contrast (see docs/visual-design.md), and every moving part is switched off
+ * for people who prefer reduced motion.
+ *
+ * Layers, back to front:
+ *   glow silver   a soft light from the top, like a spotlight
+ *   glow ember    a faint warm light from the bottom right
+ *   beam          a slanted shaft of light that drifts at its own speed
+ *   grid          a fine dot grid that fades out toward the edges
+ *   grain         film grain, so the gradients never look flat or banded
+ *   vignette      darkens the corners and keeps focus on the content
+ *
+ * Parallax comes from two sources, which are combined with separate CSS properties
+ * (`transform` for scrolling, `translate` for the pointer) so they never fight:
+ *   - Scrolling: CSS scroll-driven animations (Chrome 115+). They run off the main
+ *     thread, so there is no scroll handler and no jank. Each layer drifts at its own
+ *     speed (--bw-drift). Browsers without support simply show the layers still.
+ *   - Pointer: ambient.js sets --px and --py (-1 to 1) on .bw-ambient, and each layer
+ *     moves by its own --bw-depth.
+ */
+
+.bw-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--bw-bg);
+  contain: layout paint;
+}
+
+.bw-ambient-layer {
+  position: absolute;
+  will-change: transform, translate;
+  translate: calc(var(--px, 0) * var(--bw-depth, 0) * 1px)
+    calc(var(--py, 0) * var(--bw-depth, 0) * 1px);
+  transition: translate 900ms var(--bw-ease);
+}
+
+.bw-glow {
+  border-radius: 50%;
+}
+
+.bw-glow-silver {
+  --bw-depth: 34;
+  --bw-drift: -150px;
+  top: -38vmax;
+  left: 50%;
+  width: 96vmax;
+  height: 80vmax;
+  margin-left: -38vmax;
+  background: radial-gradient(
+    closest-side,
+    rgba(var(--bw-glow-silver), 0.2) 0%,
+    rgba(var(--bw-glow-silver), 0.085) 42%,
+    transparent 100%
+  );
+}
+
+.bw-glow-ember {
+  --bw-depth: -52;
+  --bw-drift: -300px;
+  right: -30vmax;
+  bottom: -34vmax;
+  width: 84vmax;
+  height: 84vmax;
+  background: radial-gradient(
+    closest-side,
+    rgba(var(--bw-glow-ember), 0.17) 0%,
+    rgba(var(--bw-glow-ember), 0.065) 46%,
+    transparent 100%
+  );
+}
+
+.bw-ambient-beam {
+  --bw-depth: -18;
+  --bw-drift: -220px;
+  top: -30vh;
+  left: 6vw;
+  width: 44vw;
+  height: 160vh;
+  rotate: 16deg;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(var(--bw-glow-silver), 0.07) 50%,
+    transparent 100%
+  );
+  filter: blur(26px);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 28%, #000 62%, transparent 100%);
+}
+
+.bw-ambient-grid {
+  --bw-depth: 10;
+  --bw-drift: -56px;
+  inset: -80px 0 -80px 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.085) 1px, transparent 1.3px);
+  background-size: 30px 30px;
+  mask-image: radial-gradient(ellipse 78% 62% at 50% 6%, #000 0%, transparent 78%);
+}
+
+.bw-ambient-grain {
+  --bw-depth: 0;
+  inset: 0;
+  background-image: url('../textures/grain.svg');
+  background-size: 220px 220px;
+  opacity: 0.1;
+  transition: none;
+}
+
+.bw-ambient-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 120% 90% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.5) 100%),
+    linear-gradient(180deg, transparent 70%, rgba(0, 0, 0, 0.35) 100%);
+}
+
+/* ---------- Scroll parallax (no JavaScript) ---------- */
+
+@keyframes bw-drift {
+  to {
+    transform: translate3d(0, var(--bw-drift, 0px), 0);
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .bw-ambient-layer:not(.bw-ambient-grain) {
+      animation: bw-drift linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+/* ---------- Depth on content ---------- */
+
+/* Cards lift in as they enter the screen. Uses `translate`, so hover transforms still work. */
+@keyframes bw-rise {
+  from {
+    opacity: 0;
+    translate: 0 22px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* A page header drifts up more slowly than the page and softens as it leaves the screen. */
+@keyframes bw-header-exit {
+  to {
+    opacity: 0.25;
+    translate: 0 -26px;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .db-main .bw-card {
+      animation: bw-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 32%;
+    }
+
+    .db-main .db-page-header {
+      animation: bw-header-exit linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+  }
+}
+
+/* Each page's top-level blocks arrive one after another. Time-based, played once per page. */
+@keyframes bw-enter {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .db-main > :nth-child(n + 2) {
+    animation: bw-enter 560ms var(--bw-ease) both;
+    animation-delay: 70ms;
+  }
+
+  .db-main > :nth-child(n + 3) {
+    animation-delay: 140ms;
+  }
+
+  .db-main > :nth-child(n + 4) {
+    animation-delay: 210ms;
+  }
+
+  .db-main > :nth-child(n + 5) {
+    animation-delay: 280ms;
+  }
+}
+
+/* ---------- Pointer spotlight on cards ---------- */
+
+.bw-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.bw-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(
+    340px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(255, 255, 255, 0.075),
+    transparent 62%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 260ms var(--bw-ease);
+}
+
+.bw-card:hover::before {
+  opacity: 1;
+}
+
+/* Small icon chips inside a card lean a few pixels toward the pointer. */
+.bw-card .db-stat-icon {
+  translate: calc(var(--cx, 0) * 3px) calc(var(--cy, 0) * 3px);
+  transition: translate 220ms var(--bw-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bw-ambient-layer,
+  .bw-card .db-stat-icon {
+    translate: none;
+    transition: none;
+    will-change: auto;
+  }
+}
+
+@media (forced-colors: active) {
+  .bw-ambient {
+    display: none;
+  }
+}

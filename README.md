@@ -18,6 +18,7 @@ BrowseWise measures how much active time you spend on each website and shows it 
 - Automatic website categories with manual overrides
 - A daily goal and per-website limits with optional notifications (BrowseWise only reminds you, it never blocks anything)
 
+- A modern dark interface: layered gradients, a fine grid and film grain, glass-style cards, and subtle parallax that is switched off for people who prefer reduced motion
 - History by day, by week, and for a single website, with a link from any day to its detailed analytics
 - A Settings page: idle threshold, tracking switches, and how long history is kept
 - CSV and JSON export, and separate buttons to clear history or delete everything
@@ -39,6 +40,7 @@ BrowseWise measures **active browsing time**: time the Chrome window is focused,
 - [Goals and limits](docs/goals.md)
 - [History, export, and data deletion](docs/history-and-data.md)
 - [Privacy policy](docs/privacy-policy.md)
+- [Visual design](docs/visual-design.md)
 - [Permissions](docs/permissions.md)
 - [Design system](docs/design-system.md) and [branding](docs/branding.md)
 - [Manual testing](docs/manual-testing.md)

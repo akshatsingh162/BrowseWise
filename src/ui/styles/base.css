@@ -1,10 +1,10 @@
-/* Font: Inter (SIL Open Font License), bundled locally. No requests to font servers. */
+/* Font: Plus Jakarta Sans (SIL Open Font License), bundled locally. No requests to font servers. */
 @font-face {
-  font-family: 'Inter';
+  font-family: 'Plus Jakarta Sans';
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 200 800;
   font-display: swap;
-  src: url('../fonts/inter-latin-wght-normal.woff2') format('woff2-variations');
+  src: url('../fonts/plus-jakarta-sans-latin-wght-normal.woff2') format('woff2-variations');
 }
 
 *,
@@ -15,16 +15,23 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  background: var(--bw-bg);
 }
 
 body {
   margin: 0;
-  background: var(--bw-bg);
+  /* Transparent on purpose: the ambient background sits behind the body (see ambient.css). */
+  background: transparent;
   color: var(--bw-text);
   font-family: var(--bw-font);
   font-size: var(--bw-text-base);
-  line-height: 1.45;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 h1,

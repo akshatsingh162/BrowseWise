@@ -15,9 +15,11 @@
   flex-direction: column;
   gap: var(--bw-space-6);
   height: 100vh;
-  padding: var(--bw-space-5) var(--bw-space-3);
-  border-right: 1px solid var(--bw-border-subtle);
-  background: var(--bw-bg);
+  padding: var(--bw-space-6) var(--bw-space-3) var(--bw-space-5);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(14, 14, 17, 0.72), rgba(8, 8, 10, 0.82));
+  -webkit-backdrop-filter: blur(22px) saturate(120%);
+  backdrop-filter: blur(22px) saturate(120%);
 }
 
 .db-brand {
@@ -34,8 +36,14 @@
 
 .db-brand-name {
   font-size: var(--bw-text-md);
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.db-logo {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 6px 18px -4px rgba(255, 255, 255, 0.22);
 }
 
 .db-nav {
@@ -59,14 +67,31 @@
     color var(--bw-duration) var(--bw-ease);
 }
 
+.db-nav-link {
+  position: relative;
+}
+
 .db-nav-link:hover {
-  background: var(--bw-surface);
+  background: rgba(255, 255, 255, 0.055);
   color: var(--bw-text);
 }
 
 .db-nav-link[aria-current='page'] {
-  background: var(--bw-accent-soft);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.115), rgba(255, 255, 255, 0.04));
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07) inset;
   color: var(--bw-text);
+}
+
+.db-nav-link[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 9px;
+  bottom: 9px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, #ffffff, rgba(var(--bw-glow-ember), 0.9));
+  box-shadow: 0 0 12px rgba(var(--bw-glow-ember), 0.55);
 }
 
 .db-nav-link[aria-current='page'] .bw-icon {
@@ -79,8 +104,9 @@
   gap: var(--bw-space-2);
   margin-top: auto;
   padding: var(--bw-space-3);
-  border: 1px solid var(--bw-border-subtle);
+  border: 1px solid var(--bw-border-glass);
   border-radius: var(--bw-radius-md);
+  background: rgba(255, 255, 255, 0.03);
   color: var(--bw-text-faint);
   font-size: var(--bw-text-xs);
 }
@@ -92,9 +118,9 @@
 
 .db-main {
   width: 100%;
-  max-width: 1040px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: var(--bw-space-6) 32px 48px;
+  padding: 40px 40px 72px;
 }
 
 .db-main:focus {
@@ -108,19 +134,33 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: var(--bw-space-4);
-  margin-bottom: var(--bw-space-6);
+  margin-bottom: 32px;
 }
 
 .db-page-title {
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+  /* Light to soft grey, like the reference: the first line reads brightest. */
+  background: linear-gradient(180deg, #ffffff 20%, #a9a9b4 120%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: var(--bw-text-title);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+@media (forced-colors: active) {
+  .db-page-title {
+    background: none;
+    color: CanvasText;
+  }
 }
 
 .db-page-desc {
-  margin-top: var(--bw-space-1);
-  color: var(--bw-text-muted);
+  margin-top: var(--bw-space-2);
+  /* Sits over the brightest part of the background glow, so it is a step lighter. */
+  color: #c3c3cc;
+  font-size: var(--bw-text-md);
 }
 
 .db-page-actions {
@@ -498,11 +538,11 @@
 }
 
 .db-usage-categorized .db-usage-row {
-  grid-template-columns: minmax(0, 1.3fr) 184px minmax(60px, 1fr) 76px 44px;
+  grid-template-columns: minmax(0, 1.3fr) 220px minmax(60px, 1fr) 76px 44px;
 }
 
 .db-usage-ranked.db-usage-categorized .db-usage-row {
-  grid-template-columns: 28px minmax(0, 1.3fr) 184px minmax(60px, 1fr) 76px 44px;
+  grid-template-columns: 28px minmax(0, 1.3fr) 220px minmax(60px, 1fr) 76px 44px;
 }
 
 .db-catgroups {
@@ -772,7 +812,9 @@
   display: grid;
   place-items: center;
   padding: var(--bw-space-4);
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(4, 4, 6, 0.68);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
 }
 
 .db-modal {
@@ -782,6 +824,11 @@
   width: 100%;
   max-width: 420px;
   padding: var(--bw-space-5);
+  /* Solid, not glass: page text must never show through a dialog. */
+  background: var(--bw-glass), var(--bw-surface-raised);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 30px 80px -12px rgba(0, 0, 0, 0.8);
 }
 
 .db-modal-title {

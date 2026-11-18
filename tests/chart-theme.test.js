@@ -4,7 +4,7 @@ import { readChartTheme, withAlpha } from '../src/dashboard/charts/chart-theme.j
 
 describe('withAlpha', () => {
   it('converts a hex colour to rgba', () => {
-    expect(withAlpha('#7c6cf0', 0.5)).toBe('rgba(124, 108, 240, 0.5)');
+    expect(withAlpha('#d6d6de', 0.5)).toBe('rgba(214, 214, 222, 0.5)');
     expect(withAlpha('#000000', 1)).toBe('rgba(0, 0, 0, 1)');
   });
 
@@ -17,15 +17,15 @@ describe('withAlpha', () => {
 describe('readChartTheme', () => {
   it('falls back to the design values when tokens are not defined', () => {
     const theme = readChartTheme(document.createElement('div'));
-    expect(theme.accent).toBe('#7c6cf0');
-    expect(theme.chartMuted).toBe('#3b4150');
-    expect(theme.accentDim).toBe('rgba(124, 108, 240, 0.55)');
-    expect(theme.accentFill).toBe('rgba(124, 108, 240, 0.16)');
+    expect(theme.accent).toBe('#d6d6de');
+    expect(theme.chartMuted).toBe('#3a3a43');
+    expect(theme.accentDim).toBe('rgba(214, 214, 222, 0.55)');
+    expect(theme.accentFill).toBe('rgba(214, 214, 222, 0.16)');
   });
 
   it('reads tokens from CSS custom properties when present', () => {
     const root = document.createElement('div');
-    root.style.setProperty('--bw-accent', '#112233');
+    root.style.setProperty('--bw-chart-accent', '#112233');
     document.body.append(root);
     expect(readChartTheme(root).accent).toBe('#112233');
     root.remove();

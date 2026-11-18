@@ -16,8 +16,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--bw-space-3) var(--bw-space-4);
-  border-bottom: 1px solid var(--bw-border-subtle);
+  padding: var(--bw-space-4) var(--bw-space-4) var(--bw-space-3);
 }
 
 .pp-brand {
@@ -28,13 +27,16 @@ body {
 
 .pp-logo {
   display: block;
-  border-radius: 5px;
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 6px 16px -4px rgba(255, 255, 255, 0.22);
 }
 
 .pp-brand-name {
   font-size: var(--bw-text-md);
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .pp-body {
@@ -47,6 +49,10 @@ body {
 
 .pp-hero {
   padding: var(--bw-space-4);
+  /* A soft light from the top left makes the hero feel lit, like a card on a stage. */
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, 0.1), transparent 62%), var(--bw-glass),
+    rgba(13, 13, 16, 0.7);
 }
 
 .pp-hero-top {
@@ -64,10 +70,21 @@ body {
 
 .pp-total {
   margin-top: var(--bw-space-2);
+  background: linear-gradient(180deg, #ffffff 25%, #a9a9b4 130%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   font-size: var(--bw-text-display);
-  font-weight: 600;
-  letter-spacing: -0.03em;
+  font-weight: 700;
+  letter-spacing: -0.045em;
   line-height: 1.1;
+}
+
+@media (forced-colors: active) {
+  .pp-total {
+    background: none;
+    color: CanvasText;
+  }
 }
 
 .pp-stats {
@@ -188,7 +205,8 @@ body {
   gap: var(--bw-space-2);
   margin-top: auto;
   padding: var(--bw-space-3) var(--bw-space-4) var(--bw-space-4);
-  border-top: 1px solid var(--bw-border-subtle);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(180deg, rgba(8, 8, 10, 0.2), rgba(8, 8, 10, 0.75));
 }
 
 .pp-footnote {

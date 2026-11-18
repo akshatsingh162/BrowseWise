@@ -1,36 +1,42 @@
 /*
  * Design tokens: the only place raw colours, sizes and timings are defined.
  * Components reference these variables, so the whole look can be re-themed here.
- * Dark-first. All text/background pairs below meet WCAG AA (4.5:1).
+ * Dark-first, neutral graphite with one near-white accent. The decorative light
+ * (glows, grid, grain) is in ambient.css and is never needed to read anything.
+ * All text/background pairs below meet WCAG AA (4.5:1); see docs/visual-design.md.
  */
 :root {
   color-scheme: dark;
 
-  /* Surfaces */
-  --bw-bg: #0e0f12;
-  --bw-surface: #15171c;
-  --bw-surface-raised: #1b1e24;
-  --bw-surface-hover: #20232a;
+  /* Surfaces (solid; glass effects are layered on top of these in components.css) */
+  --bw-bg: #08080a;
+  --bw-surface: #111114;
+  --bw-surface-raised: #18181c;
+  --bw-surface-hover: #202025;
 
   /* Borders */
-  --bw-border: #262a31;
-  --bw-border-subtle: #1f2329;
+  --bw-border: #2a2a31;
+  --bw-border-hover: #3c3c45;
+  --bw-border-subtle: #1c1c21;
+  --bw-border-glass: rgba(255, 255, 255, 0.09);
 
-  /* Text (contrast on --bw-surface: 14.9 / 6.9 / 5.3) */
-  --bw-text: #e8eaee;
-  --bw-text-muted: #9aa1ad;
-  --bw-text-faint: #858c99;
+  /* Text */
+  --bw-text: #f3f3f6;
+  --bw-text-muted: #b0b0ba;
+  --bw-text-faint: #9d9da8;
 
-  /* One accent colour */
-  --bw-accent: #7c6cf0;
-  --bw-accent-strong: #6d5de6; /* button background; white text = 4.8:1 */
-  --bw-accent-strong-hover: #5f4fdb;
-  --bw-accent-text: #a79df7; /* accent used as text; 7.5:1 on surface */
-  --bw-accent-soft: rgba(124, 108, 240, 0.14);
-  --bw-on-accent: #ffffff;
+  /* One accent: near-white. Primary buttons are light with dark text. */
+  --bw-accent: #f3f3f6;
+  --bw-accent-strong: #f3f3f6; /* button background; --bw-on-accent text = 17:1 */
+  --bw-accent-strong-hover: #ffffff;
+  --bw-accent-text: #ffffff;
+  --bw-accent-soft: rgba(255, 255, 255, 0.09);
+  --bw-on-accent: #0b0b0e;
 
-  /* Charts: a neutral series for comparisons (e.g. the previous period) */
-  --bw-chart-muted: #3b4150;
+  /* Charts: the main series is a little softer than pure white; a neutral series is used
+     for comparisons (e.g. the previous period) */
+  --bw-chart-accent: #d6d6de;
+  --bw-chart-muted: #3a3a43;
 
   /* Category colours: muted hues, always shown beside a text label (never colour alone) */
   --bw-cat-education: #4fb8a6;
@@ -47,14 +53,20 @@
   --bw-danger: #f87171;
   --bw-warning: #f5a524;
 
+  /* Decorative light (RGB triplets so they can take an alpha) */
+  --bw-glow-silver: 255, 255, 255;
+  --bw-glow-ember: 232, 170, 110;
+
   /* Typography */
   --bw-font:
-    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
   --bw-text-xs: 11px;
   --bw-text-sm: 12px;
   --bw-text-base: 13px;
   --bw-text-md: 15px;
-  --bw-text-display: 34px;
+  --bw-text-title: 30px;
+  --bw-text-display: 36px;
 
   /* Spacing (4px scale) */
   --bw-space-1: 4px;
@@ -65,10 +77,17 @@
   --bw-space-6: 24px;
 
   /* Shape */
-  --bw-radius-sm: 6px;
-  --bw-radius-md: 10px;
-  --bw-radius-lg: 14px;
-  --bw-shadow-card: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 8px 24px rgba(0, 0, 0, 0.28);
+  --bw-radius-sm: 7px;
+  --bw-radius-md: 11px;
+  --bw-radius-lg: 16px;
+  --bw-glass: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.058) 0%,
+    rgba(255, 255, 255, 0.022) 100%
+  );
+  --bw-shadow-card:
+    0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 14px 34px -10px rgba(0, 0, 0, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.25);
 
   /* Motion (restrained; disabled for users who prefer reduced motion) */
   --bw-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
