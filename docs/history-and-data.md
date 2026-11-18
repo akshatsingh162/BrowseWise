@@ -25,10 +25,13 @@ The **Keep history for** setting (Settings → History) decides how many days ar
 - **Shortening it asks first**, naming exactly how many recorded days will be deleted, and goes back to the previous value if you cancel. If no recorded day is older than the new limit, nothing is deleted and no confirmation is shown.
 - Pruning is done by the service worker (`src/background/maintenance.js`): at most once per local day, after tracking, and straight away when settings change. The day it last ran is stored under the key `maintenance`. A failure there is logged and never interrupts tracking.
 - Today is never deleted: the shortest retention is 7 days.
+- Focus sessions older than the retention are deleted too. Earned badges and best streaks are kept. The number of days in the confirmation counts a day once, whether it has browsing time, focus sessions, or both.
 
 ## Export
 
 Settings → Your data. Pick a range (all time, last 30 days, last 90 days, last year), then **Export JSON** or **Export CSV**.
+
+The JSON export also has a `focus` section (days, badges earned, best streaks). It only adds fields, so `exportFormat` stays 1.
 
 The file is created in the page with a `Blob` and a temporary link, so the browser saves it as an ordinary download. No permission is needed and nothing is uploaded. Before exporting, the worker is asked to save the in-progress interval, so the file is current to the second. If the range has no recorded time, a message is shown instead of an empty file.
 
@@ -69,10 +72,10 @@ One row per website per day. Header: `date,domain,category,seconds`. Lines end i
 
 ## Deleting data
 
-| Action                | What it deletes                                                         | What it keeps                                          |
-| --------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------ |
-| **Clear history**     | All recorded time (every `usage:*` record).                             | Settings, goals and limits, and your category choices. |
-| **Delete everything** | All stored data. Settings return to their defaults (notifications off). | Nothing. The extension is as freshly installed.        |
+| Action                | What it deletes                                                                          | What it keeps                                                                        |
+| --------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| **Clear history**     | All recorded time (every `usage:*` record), plus the focus sessions, streaks and badges. | Settings, goals and limits, category choices, and a focus timer that is running now. |
+| **Delete everything** | All stored data. Settings return to their defaults (notifications off).                  | Nothing. The extension is as freshly installed.                                      |
 
 Both ask first with an accessible confirmation dialog.
 
