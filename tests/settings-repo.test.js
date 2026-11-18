@@ -62,3 +62,72 @@ describe('sanitizeSettings', () => {
     expect(sanitizeSettings('nope')).toEqual(DEFAULT_SETTINGS);
   });
 });
+
+describe('focus settings', () => {
+  it('defaults to a 25 minute session, 5 and 15 minute breaks every 4 sessions', () => {
+    expect(sanitizeSettings(null)).toMatchObject({
+      focusMinutes: 25,
+      shortBreakMinutes: 5,
+      longBreakMinutes: 15,
+      longBreakEvery: 4,
+      autoStartNext: false,
+      showAchievements: true,
+    });
+  });
+
+  it('keeps valid values', () => {
+    expect(
+      sanitizeSettings({
+        focusMinutes: 50,
+        shortBreakMinutes: 10,
+        longBreakMinutes: 30,
+        longBreakEvery: 3,
+      }),
+    ).toMatchObject({
+      focusMinutes: 50,
+      shortBreakMinutes: 10,
+      longBreakMinutes: 30,
+      longBreakEvery: 3,
+    });
+  });
+
+  it('clamps stored values into range, so a damaged setting cannot break the timer', () => {
+    expect(sanitizeSettings({ focusMinutes: 1 }).focusMinutes).toBe(5);
+    expect(sanitizeSettings({ focusMinutes: 500 }).focusMinutes).toBe(120);
+    expect(sanitizeSettings({ shortBreakMinutes: 0 }).shortBreakMinutes).toBe(1);
+    expect(sanitizeSettings({ longBreakEvery: 1 }).longBreakEvery).toBe(2);
+    expect(sanitizeSettings({ longBreakEvery: 99 }).longBreakEvery).toBe(8);
+  });
+
+  it('falls back to defaults for wrong types', () => {
+    expect(
+      sanitizeSettings({ focusMinutes: '25', autoStartNext: 'yes', showAchievements: 0 }),
+    ).toMatchObject({
+      focusMinutes: 25,
+      autoStartNext: false,
+      showAchievements: true,
+    });
+  });
+
+  it('accepts the two switches', () => {
+    expect(sanitizeSettings({ autoStartNext: true, showAchievements: false })).toMatchObject({
+      autoStartNext: true,
+      showAchievements: false,
+    });
+  });
+
+  it('fills the new settings in for an install that was made before they existed', () => {
+    const old = {
+      idleThresholdSeconds: 120,
+      countAudibleTabsAsActive: true,
+      trackLocalHosts: false,
+      notificationsEnabled: false,
+      retentionDays: 90,
+    };
+    expect(sanitizeSettings(old)).toMatchObject({
+      idleThresholdSeconds: 120,
+      retentionDays: 90,
+      focusMinutes: 25,
+    });
+  });
+});

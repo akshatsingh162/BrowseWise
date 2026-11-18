@@ -67,6 +67,47 @@ describe('eraseData: history', () => {
   });
 });
 
+describe('eraseData: focus data', () => {
+  const withFocus = async () => {
+    await chromeMock.storage.local.set({
+      'focusDay:2026-11-05': {
+        date: '2026-11-05',
+        sessions: 2,
+        focusMs: 3_000_000,
+        longestMs: 1_500_000,
+      },
+      achievements: { earned: { 'first-session': '2026-11-05' } },
+      focusState: {
+        phase: 'focus',
+        status: 'ready',
+        durationMs: 1_500_000,
+        remainingMs: 1_500_000,
+        startedAt: null,
+        endsAt: null,
+        cycle: 0,
+        sessionId: 'abc',
+      },
+    });
+  };
+
+  it('clears the focus history and achievements, but not a timer that is running now', async () => {
+    await withFocus();
+    await eraseData('history');
+    const data = await stored();
+    expect(data['focusDay:2026-11-05']).toBeUndefined();
+    expect(data.achievements).toBeUndefined();
+    expect(data.focusState).toMatchObject({ sessionId: 'abc' });
+    expect(data.settings.idleThresholdSeconds).toBe(300); // settings stay
+  });
+
+  it('removes all of it, the timer included, when everything is deleted', async () => {
+    await withFocus();
+    await eraseData('everything');
+    const data = await stored();
+    expect(Object.keys(data).sort()).toEqual(['meta', 'settings']);
+  });
+});
+
 describe('eraseData: everything', () => {
   it('clears all data and writes the defaults again', async () => {
     await eraseData('everything');

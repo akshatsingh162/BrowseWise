@@ -339,6 +339,27 @@ describe('startDashboard (smoke test with the real wiring)', () => {
     expect(document.querySelector('.db-version').textContent).toBe('BrowseWise 0.1.0');
   });
 
+  it('shows the focus page with the timer, the numbers and the badges', async () => {
+    await boot('#focus');
+    expect(document.querySelector('h1').textContent).toBe('Focus');
+    expect(document.querySelector('[aria-current="page"]').getAttribute('href')).toBe('#focus');
+    expect(document.querySelector('.fo-ring-time').textContent).toBe('25:00');
+    await vi.waitFor(() => expect(document.querySelector('.fo-badges')).not.toBeNull());
+    expect(document.querySelectorAll('.fo-badge')).toHaveLength(14);
+    expect(document.querySelectorAll('.fo-week-day')).toHaveLength(7);
+    expect(document.querySelector('.fo-controls button').textContent.trim()).toBe('Start focus');
+  });
+
+  it('shows the focus timer settings with the stored values', async () => {
+    await boot('#settings');
+    await vi.waitFor(() => expect(document.querySelector('.db-facts')).not.toBeNull());
+    expect(document.querySelector('#focus-minutes').value).toBe('25');
+    expect(document.querySelector('#long-break-every').value).toBe('4');
+    expect(document.querySelector('#setting-achievements').getAttribute('aria-checked')).toBe(
+      'true',
+    );
+  });
+
   it('opens the analytics page on the day named in the address', async () => {
     await boot('#analytics?day=2026-11-01');
     expect(document.querySelector('h1').textContent).toBe('Analytics');

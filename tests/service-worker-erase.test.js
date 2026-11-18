@@ -41,6 +41,7 @@ async function loadWorker(initialStorage = {}) {
       onAlarm: event('alarm'),
       get: vi.fn(async () => ({ name: 'browsewise-heartbeat' })),
       create: vi.fn(async () => {}),
+      clear: vi.fn(async () => true),
     },
   });
   chrome.storage.onChanged = event('storageChanged');
@@ -88,6 +89,34 @@ describe('ERASE_DATA: history', () => {
     expect(data.settings.idleThresholdSeconds).toBe(300);
     expect(data.goals.dailyGoalMs).toBe(3_600_000);
     expect(data.categoryOverrides).toEqual({ 'a.com': 'news' });
+  });
+
+  it('removes the focus history but leaves a running timer alone', async () => {
+    const { chrome, listeners } = await loadWorker({
+      'focusDay:2026-11-05': {
+        date: '2026-11-05',
+        sessions: 3,
+        focusMs: 4_500_000,
+        longestMs: 1_500_000,
+      },
+      achievements: { earned: { 'first-session': '2026-11-05' } },
+      focusState: {
+        phase: 'focus',
+        status: 'paused',
+        durationMs: 1_500_000,
+        remainingMs: 600_000,
+        startedAt: null,
+        endsAt: null,
+        cycle: 1,
+        sessionId: 'keep',
+      },
+    });
+
+    expect(await erase(listeners, 'history')).toEqual({ ok: true });
+    const data = await stored(chrome);
+    expect(data['focusDay:2026-11-05']).toBeUndefined();
+    expect(data.achievements).toBeUndefined();
+    expect(data.focusState).toMatchObject({ sessionId: 'keep', remainingMs: 600_000 });
   });
 
   it('erases the not-yet-saved interval too, so it cannot reappear afterwards', async () => {
@@ -138,6 +167,26 @@ describe('ERASE_DATA: everything', () => {
     expect(chrome.idle.setDetectionInterval).toHaveBeenLastCalledWith(
       DEFAULT_SETTINGS.idleThresholdSeconds,
     );
+  });
+
+  it('also ends a running focus timer and removes its alarm when everything is deleted', async () => {
+    const { chrome, listeners } = await loadWorker({
+      focusState: {
+        phase: 'focus',
+        status: 'running',
+        durationMs: 1_500_000,
+        remainingMs: 1_500_000,
+        startedAt: 1,
+        endsAt: 9_999_999_999_999,
+        cycle: 0,
+        sessionId: 'gone',
+      },
+    });
+    chrome.alarms.clear.mockClear();
+
+    await erase(listeners, 'everything');
+    expect((await stored(chrome)).focusState).toBeUndefined();
+    expect(chrome.alarms.clear).toHaveBeenCalledWith('browsewise-focus');
   });
 
   it('starts tracking again afterwards', async () => {

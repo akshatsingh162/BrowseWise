@@ -14,6 +14,7 @@ describe('parseRoute', () => {
     ['#analytics', 'analytics'],
     ['#websites', 'websites'],
     ['#history', 'history'],
+    ['#focus', 'focus'],
     ['#goals', 'goals'],
     ['#settings', 'settings'],
     ['#/websites', 'websites'],
@@ -31,12 +32,13 @@ describe('parseRoute', () => {
     },
   );
 
-  it('knows exactly the six dashboard pages, in navigation order', () => {
+  it('knows exactly the seven dashboard pages, in navigation order', () => {
     expect(ROUTES.map((route) => route.id)).toEqual([
       'overview',
       'analytics',
       'websites',
       'history',
+      'focus',
       'goals',
       'settings',
     ]);

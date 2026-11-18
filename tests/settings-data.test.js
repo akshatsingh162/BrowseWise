@@ -91,6 +91,30 @@ describe('collectExportData', () => {
     expect(data.settings).toEqual({ ...DEFAULT_SETTINGS });
   });
 
+  it('includes focus days (filtered to the range) and the achievements', async () => {
+    await chromeMock.storage.local.set({
+      'focusDay:2026-01-05': {
+        date: '2026-01-05',
+        sessions: 1,
+        focusMs: 1_500_000,
+        longestMs: 1_500_000,
+      },
+      'focusDay:2026-11-10': {
+        date: '2026-11-10',
+        sessions: 2,
+        focusMs: 3_000_000,
+        longestMs: 1_500_000,
+      },
+      achievements: { earned: { 'first-session': '2026-01-05' }, best: { focus: 1, goal: 0 } },
+    });
+    const all = await collectExportData('all', NOW);
+    expect(all.focusDays.map((d) => d.date)).toEqual(['2026-01-05', '2026-11-10']);
+    expect(all.achievements.earned).toEqual({ 'first-session': '2026-01-05' });
+
+    const recent = await collectExportData('30d', NOW);
+    expect(recent.focusDays.map((d) => d.date)).toEqual(['2026-11-10']);
+  });
+
   it('rejects an unknown range', async () => {
     await expect(collectExportData('week', NOW)).rejects.toThrow(RangeError);
   });
@@ -107,6 +131,25 @@ describe('countDaysToDelete', () => {
     expect(await countDaysToDelete(90, NOW)).toBe(1);
     expect(await countDaysToDelete(365, NOW)).toBe(0);
     expect(await countDaysToDelete(7, NOW)).toBe(2);
+  });
+
+  it('counts a day once, even with browsing time and focus sessions, and counts focus-only days', async () => {
+    await add('2026-08-01', 'a.com', 1);
+    await chromeMock.storage.local.set({
+      'focusDay:2026-08-01': {
+        date: '2026-08-01',
+        sessions: 1,
+        focusMs: 1_500_000,
+        longestMs: 1_500_000,
+      },
+      'focusDay:2026-08-02': {
+        date: '2026-08-02',
+        sessions: 1,
+        focusMs: 1_500_000,
+        longestMs: 1_500_000,
+      },
+    });
+    expect(await countDaysToDelete(30, NOW)).toBe(2); // 1 Aug (both kinds) and 2 Aug (focus only)
   });
 
   it('is zero for an empty history', async () => {

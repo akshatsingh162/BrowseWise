@@ -103,6 +103,38 @@ describe('runMaintenance', () => {
     expect(data.settings.retentionDays).toBe(30);
   });
 
+  it('deletes old focus days with the same retention, and keeps badges and best streaks', async () => {
+    const chromeMock = await setup({ days: ['2026-11-30'] });
+    await chromeMock.storage.local.set({
+      'focusDay:2026-09-01': {
+        date: '2026-09-01',
+        sessions: 1,
+        focusMs: 1_500_000,
+        longestMs: 1_500_000,
+      },
+      'focusDay:2026-11-20': {
+        date: '2026-11-20',
+        sessions: 1,
+        focusMs: 1_500_000,
+        longestMs: 1_500_000,
+      },
+      achievements: {
+        earned: { 'first-session': '2026-09-01' },
+        best: { focus: 3, goal: 0 },
+        days: { '2026-09-01': 'met' },
+        lastClosed: '2026-09-01',
+      },
+    });
+
+    await runMaintenance({ now: at(11, 30) });
+    const data = await chromeMock.storage.local.get(null);
+    expect(data['focusDay:2026-09-01']).toBeUndefined();
+    expect(data['focusDay:2026-11-20']).toBeDefined();
+    expect(data.achievements.earned).toEqual({ 'first-session': '2026-09-01' });
+    expect(data.achievements.best.focus).toBe(3);
+    expect(data.achievements.days).toEqual({});
+  });
+
   it('works on an empty store', async () => {
     await setup();
     expect(await runMaintenance({ now: at(11, 30) })).toEqual({ ran: true, removedDays: 0 });
