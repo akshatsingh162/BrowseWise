@@ -376,3 +376,73 @@ Open the dashboard and the popup. Run these in a normal window first, then with 
 | V15 | Performance          | Open DevTools → **Performance**, record while scrolling and moving the mouse for 5 seconds     | Smooth; no long tasks while scrolling. **Report the average frame rate and the machine you use**                                 |
 | V16 | Zoom                 | Zoom the page to 200%                                                                          | Text stays readable and the layout does not break                                                                                |
 | V17 | High contrast        | Turn on a Windows contrast theme                                                               | Background effects disappear; text and controls stay clear                                                                       |
+
+## Focus timer (Phase 10)
+
+Open the dashboard and choose **Focus**. For quick runs use the worker console snippet at the end of this section instead of waiting 25 minutes.
+
+| #   | Test             | Steps                                                                           | Expected                                                                                                   |
+| --- | ---------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| F1  | Ready state      | Open **Focus** with no timer running                                            | A ring showing 25:00 and "Ready", four empty dots, one **Start focus** button                              |
+| F2  | Start            | Press **Start focus**                                                           | The ring fills as time passes; the countdown goes down once a second; the browser tab title shows the time |
+| F3  | Pause and resume | Press **Pause**, wait 30 seconds, press **Resume**                              | The time stops while paused (the ring turns grey and says "Focus paused") and carries on from where it was |
+| F4  | Stop             | Press **Stop**                                                                  | Back to "Ready"; no session is counted; the tab title returns to normal                                    |
+| F5  | Closing the tab  | Start a session, close the dashboard tab, wait a minute, reopen **Focus**       | The timer is still running with the right time left                                                        |
+| F6  | Popup            | Start a session, open the popup                                                 | A timer card under the header shows the same time with **Pause** and **Stop**                              |
+| F7  | Popup controls   | Pause from the popup, then look at the dashboard                                | The dashboard shows it paused within a second or so                                                        |
+| F8  | Two places       | Start from the popup, stop from the dashboard                                   | Both always agree                                                                                          |
+| F9  | Length           | With no timer, change **Next focus session** to 45 minutes                      | The ring shows 45:00; the choice is also in **Settings → Focus timer**                                     |
+| F10 | End of a session | Let a session finish (see the snippet below)                                    | The count goes up by one, the ring offers a **short break**, and "Focus today" increases                   |
+| F11 | Break            | Press **Start break**, then try **Skip break** on another                       | The ring turns warm-coloured and says "Short break"; skipping goes to the next focus session               |
+| F12 | Long break       | Finish four sessions                                                            | The fourth is followed by a **long break**, and four dots are filled                                       |
+| F13 | Alarm timing     | Finish a session with the dashboard closed                                      | It is recorded within about 30 seconds of the end. **Report how long it really took**                      |
+| F14 | Browser restart  | Start a session, quit Chrome completely, reopen it within the session's length  | The timer is still running with the right time left                                                        |
+| F15 | Computer sleep   | Start a session, put the computer to sleep for longer than the session, wake it | The session counts (it counts clock time) and no old notification appears                                  |
+| F16 | Notifications    | With notifications on (Goals page), finish a session                            | A "Focus session complete" notification; clicking it opens **Focus**                                       |
+| F17 | Automatic start  | Turn on **Start the next phase automatically** in Settings, finish a session    | The break starts by itself                                                                                 |
+| F18 | Keyboard         | Use only Tab, Enter and Space on the page                                       | Every button and the length selector work; focus is always visible                                         |
+| F19 | Screen reader    | With a screen reader, focus the ring                                            | It reads the phase and the time left, and does not announce every second                                   |
+
+**Quick finish (worker console, `chrome://extensions` → BrowseWise → service worker).** With a session running, make it end in 10 seconds:
+
+```js
+const s = (await chrome.storage.local.get('focusState')).focusState;
+await chrome.storage.local.set({ focusState: { ...s, endsAt: Date.now() + 10000 } });
+// Then wait about 40 seconds, or press a button on the Focus page to settle it at once.
+```
+
+## Streaks and badges (Phase 10)
+
+| #   | Test               | Steps                                                             | Expected                                                                                                                                 |
+| --- | ------------------ | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| K1  | First badge        | Finish your first session with the Focus page open                | A short burst of confetti near the new badge; "New badge: First focus" appears as text; the badge moves to the top, marked with its date |
+| K2  | Confetti placement | Do K1 with the Badges list scrolled below the visible area        | The burst still appears inside the window                                                                                                |
+| K3  | Locked badges      | Look at a badge you have not earned                               | Grey, with a lock, the words "Locked" and how close you are ("4 of 10 sessions")                                                         |
+| K4  | Tiers              | Look at the tier labels                                           | Bronze, Silver and Gold are written as words, not only coloured                                                                          |
+| K5  | Focus streak       | Finish a session on two days in a row                             | **Focus streak** shows 2 days                                                                                                            |
+| K6  | Today is safe      | On day 3, before finishing a session, look at the streak          | It still shows 2 days, not 0                                                                                                             |
+| K7  | A missed day       | Skip a whole day, then look                                       | The streak shows 0 days with "Best: 2 days"; there is no warning, no loss message, and no notification                                   |
+| K8  | Goal streak        | Set a daily goal (Goals page), stay within it, check the next day | **Within your goal** counts the finished day. A day with no browsing is skipped, not counted                                             |
+| K9  | Reduced motion     | Turn on reduced motion in Windows, earn a badge                   | No confetti and no ring pulse, but the badge and the text message still appear                                                           |
+| K10 | Hiding             | **Settings → Show streaks and badges** off                        | Streaks and badges disappear (with a link to bring them back); the timer and plain numbers stay; no badge notifications                  |
+| K11 | Showing again      | Turn it back on                                                   | Everything is back, nothing was lost                                                                                                     |
+| K12 | Clear history      | **Settings → Clear history…**                                     | The dialog mentions focus sessions, streaks and badges; afterwards they are gone but the settings stay and a running timer is untouched  |
+| K13 | Export             | Export JSON                                                       | The file has a `focus` section with your days, badges earned and best streaks                                                            |
+| K14 | Retention          | Shorten **Keep history for** so that old days are removed         | Old focus days are removed too, but earned badges and best streaks stay                                                                  |
+
+## Focus settings (Phase 10)
+
+| #   | Test        | Steps                                                                  | Expected                                                                                               |
+| --- | ----------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| S12 | Lengths     | **Settings → Focus timer**, set 50, 10, 30, and 3, press **Save**      | Saved; the Focus page uses 50 minutes; the third session is followed by the long break                 |
+| S13 | Validation  | Try 4 minutes for the focus session, 0 for a break, 9 for the interval | A message names the field and the allowed range; nothing is saved and what you typed is left as it was |
+| S14 | Persistence | Reload, then restart Chrome                                            | The values are still there                                                                             |
+
+## Installing from a download (Phase 10)
+
+| #   | Test             | Steps                                                                         | Expected                                                                                        |
+| --- | ---------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| D11 | Fresh install    | Follow [Distribution](distribution.md) from a clean folder on another profile | The extension loads, tracks, and the popup and dashboard open                                   |
+| D12 | Update in place  | Replace the files in the same folder and press reload                         | Your data is still there                                                                        |
+| D13 | Different folder | Load the same build from another folder and look at your data                 | **Report what you see** (a second copy with empty data would confirm the folder-path behaviour) |
+| D14 | Chrome's message | Restart Chrome with the extension loaded                                      | **Report whether Chrome shows a developer-mode message, and what it says**                      |

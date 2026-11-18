@@ -59,10 +59,21 @@ function copyRecord(source) {
  * @param {Record<string, string>} input.categoryOverrides
  * @param {{dailyGoalMs: number|null, siteLimits: Record<string, number>}} input.goals
  * @param {object} input.settings
+ * @param {{date: string, sessions: number, focusMs: number, longestMs: number}[]} [input.focusDays]
+ * @param {{earned: Record<string, string>, best: {focus: number, goal: number}}|null} [input.achievements]
  * @param {string} input.appVersion
  * @param {number} input.now epoch ms
  */
-export function buildJsonExport({ days, categoryOverrides, goals, settings, appVersion, now }) {
+export function buildJsonExport({
+  days,
+  categoryOverrides,
+  goals,
+  settings,
+  focusDays = [],
+  achievements = null,
+  appVersion,
+  now,
+}) {
   return {
     app: 'BrowseWise',
     exportFormat: EXPORT_FORMAT_VERSION,
@@ -83,6 +94,14 @@ export function buildJsonExport({ days, categoryOverrides, goals, settings, appV
       siteLimits: copyRecord(goals?.siteLimits),
     },
     settings: { ...settings },
+    // Added after format 1 was introduced; readers that ignore unknown fields are unaffected.
+    focus: {
+      days: [...focusDays]
+        .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+        .map(({ date, sessions, focusMs, longestMs }) => ({ date, sessions, focusMs, longestMs })),
+      badgesEarned: copyRecord(achievements?.earned),
+      bestStreaks: { focus: achievements?.best?.focus ?? 0, goal: achievements?.best?.goal ?? 0 },
+    },
   };
 }
 

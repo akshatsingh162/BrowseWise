@@ -29,6 +29,28 @@ export function sanitizeSettings(raw) {
       SETTINGS_LIMITS.retentionDays,
       DEFAULT_SETTINGS.retentionDays,
     ),
+    focusMinutes: clampInteger(
+      input.focusMinutes,
+      SETTINGS_LIMITS.focusMinutes,
+      DEFAULT_SETTINGS.focusMinutes,
+    ),
+    shortBreakMinutes: clampInteger(
+      input.shortBreakMinutes,
+      SETTINGS_LIMITS.shortBreakMinutes,
+      DEFAULT_SETTINGS.shortBreakMinutes,
+    ),
+    longBreakMinutes: clampInteger(
+      input.longBreakMinutes,
+      SETTINGS_LIMITS.longBreakMinutes,
+      DEFAULT_SETTINGS.longBreakMinutes,
+    ),
+    longBreakEvery: clampInteger(
+      input.longBreakEvery,
+      SETTINGS_LIMITS.longBreakEvery,
+      DEFAULT_SETTINGS.longBreakEvery,
+    ),
+    autoStartNext: bool('autoStartNext'),
+    showAchievements: bool('showAchievements'),
   };
 }
 

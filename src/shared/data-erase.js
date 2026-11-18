@@ -1,4 +1,5 @@
 import { MESSAGE_TYPES } from './messages.js';
+import { clearFocusHistory } from './storage/focus-repo.js';
 import { withStorageLock } from './storage/lock.js';
 import { runMigrations } from './storage/migrations.js';
 import { clearAllUsage } from './storage/usage-repo.js';
@@ -6,8 +7,9 @@ import { clearAllUsage } from './storage/usage-repo.js';
 /**
  * Erasing data.
  *
- *   history     deletes the recorded time only. Settings, goals, limits and category
- *               choices stay.
+ *   history     deletes the recorded time and the focus history (sessions, streaks and
+ *               badges). Settings, goals, limits and category choices stay. A focus
+ *               timer that is running right now is not touched.
  *   everything  deletes all stored data, then writes the defaults again, so the
  *               extension is back in the state of a fresh install.
  */
@@ -33,6 +35,7 @@ export async function eraseData(scope) {
 
   if (scope === ERASE_SCOPES.HISTORY) {
     await clearAllUsage();
+    await clearFocusHistory();
     return;
   }
 

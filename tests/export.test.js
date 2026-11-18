@@ -105,6 +105,38 @@ describe('buildJsonExport', () => {
     expect(json.usage[0].totalMs).toBe(3 * MIN);
   });
 
+  it('includes the focus sessions, earned badges and best streaks', () => {
+    const { focus } = buildJsonExport({
+      ...base,
+      focusDays: [
+        { date: '2026-11-02', sessions: 2, focusMs: 3_000_000, longestMs: 1_500_000 },
+        { date: '2026-11-01', sessions: 1, focusMs: 1_500_000, longestMs: 1_500_000 },
+      ],
+      achievements: { earned: { 'first-session': '2026-11-01' }, best: { focus: 4, goal: 2 } },
+    });
+    expect(focus.days.map((d) => d.date)).toEqual(['2026-11-01', '2026-11-02']);
+    expect(focus.days[1]).toEqual({
+      date: '2026-11-02',
+      sessions: 2,
+      focusMs: 3_000_000,
+      longestMs: 1_500_000,
+    });
+    expect(focus.badgesEarned).toEqual({ 'first-session': '2026-11-01' });
+    expect(focus.bestStreaks).toEqual({ focus: 4, goal: 2 });
+  });
+
+  it('writes an empty focus section when there is nothing, so the shape never changes', () => {
+    expect(buildJsonExport(base).focus).toEqual({
+      days: [],
+      badgesEarned: {},
+      bestStreaks: { focus: 0, goal: 0 },
+    });
+  });
+
+  it('keeps format 1, because the focus section only adds fields', () => {
+    expect(buildJsonExport(base).exportFormat).toBe(1);
+  });
+
   it('writes a missing goal as null', () => {
     const json = buildJsonExport({ ...base, goals: { dailyGoalMs: null, siteLimits: {} } });
     expect(json.goals).toEqual({ dailyGoalMs: null, siteLimits: {} });

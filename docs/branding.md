@@ -31,6 +31,6 @@ The 16 px and 32 px icons use slightly larger letters (about 16%) so the mark st
 - Do not stretch, recolour, rotate, or add effects.
 - On the dark interface the blue tile is used as is. The interface is neutral graphite with a near-white accent, which is separate from the brand blue and lets the logo stand out.
 
-### Chrome Web Store note
+### Icon sizes
 
-The store recommends a 128 px icon with about 16 px of transparent padding around the artwork. The current 128 px icon fills the tile edge to edge. A padded version will be prepared in the store-submission phase.
+BrowseWise is distributed from GitHub, not the Chrome Web Store, so the store's recommended transparent padding around the 128 px icon does not apply. The current icons fill the tile edge to edge.

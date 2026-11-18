@@ -36,7 +36,12 @@ describe('service worker when the limit check fails', () => {
       },
       windows: { ...chrome.windows, onFocusChanged: event('g') },
       idle: { ...chrome.idle, onStateChanged: event('h') },
-      alarms: { onAlarm: event('i'), get: vi.fn(async () => ({})), create: vi.fn() },
+      alarms: {
+        onAlarm: event('i'),
+        get: vi.fn(async () => ({})),
+        create: vi.fn(),
+        clear: vi.fn(async () => true),
+      },
     });
     chrome.storage.onChanged = event('j');
     vi.stubGlobal('chrome', chrome);

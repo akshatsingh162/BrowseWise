@@ -205,6 +205,71 @@
   }
 }
 
+/* ---------- Celebration (see ui/celebrate.js) ---------- */
+
+.bw-confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bw-confetti-piece {
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  width: var(--size);
+  height: calc(var(--size) * 0.45);
+  border-radius: 2px;
+  background: var(--color);
+  opacity: 0;
+}
+
+/* Pieces stay fully visible while they fly, and only fade near the end. */
+@keyframes bw-confetti {
+  0% {
+    opacity: 1;
+    translate: 0 0;
+    rotate: 0deg;
+  }
+
+  65% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    translate: var(--dx) var(--dy);
+    rotate: var(--rot);
+  }
+}
+
+/* The timer ring swells once when a session finishes. */
+@keyframes bw-pulse {
+  0% {
+    scale: 1;
+  }
+
+  35% {
+    scale: 1.045;
+  }
+
+  100% {
+    scale: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bw-confetti-piece {
+    animation: bw-confetti 1600ms cubic-bezier(0.2, 0.6, 0.35, 1) var(--delay, 0ms) both;
+  }
+
+  .fo-ring.is-pulsing {
+    animation: bw-pulse 1100ms var(--bw-ease);
+  }
+}
+
 /* ---------- Pointer spotlight on cards ---------- */
 
 .bw-card {

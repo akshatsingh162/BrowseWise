@@ -13,7 +13,7 @@ The dashboard is a single extension page (`src/dashboard/dashboard.html`) with a
 | `data.js`, `*-data.js`    | Load and aggregate stored usage for each page (history, settings, goals, analytics). |
 | `components/data-view.js` | Loading, error, and ready states, live refresh, and out-of-order protection.         |
 | `components/*`            | Stat card, usage list, segmented control, page header, state card.                   |
-| `pages/*`                 | One module per page: Overview, Analytics, Websites, History, Goals, Settings.        |
+| `pages/*`                 | One module per page: Overview, Analytics, Websites, History, Focus, Goals, Settings. |
 
 ## Page contract
 

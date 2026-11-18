@@ -43,6 +43,7 @@ async function loadWorker({
       onAlarm: event('alarm'),
       get: vi.fn(async () => ({ name: 'browsewise-heartbeat' })),
       create: vi.fn(async () => {}),
+      clear: vi.fn(async () => true),
     },
     permissions: { contains: vi.fn(async () => permission), onAdded: event('permissionsAdded') },
   });

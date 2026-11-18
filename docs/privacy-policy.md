@@ -1,8 +1,8 @@
 # BrowseWise Privacy Policy
 
-_Draft for version 0.1.0. Last updated: 15 November 2026._
+_Draft for version 0.1.0. Last updated: 17 November 2026._
 
-BrowseWise is a Chrome extension that shows how much active time you spend on each website. It is built to work entirely on your own computer.
+BrowseWise is a Chrome extension that shows how much active time you spend on each website, and includes a focus timer. It is built to work entirely on your own computer. It is distributed from GitHub, not from the Chrome Web Store.
 
 ## The short version
 
@@ -17,6 +17,7 @@ On your device, BrowseWise keeps:
 
 - **Websites and time.** For each day, the **domain** of each website you used (for example `youtube.com`) and the number of active seconds spent on it, in total and per hour of the day.
 - **Your choices.** Settings, goals and limits you set, and any website category you changed.
+- **Focus timer.** The timer that is running now, and for each day the number of focus sessions you completed and how long they lasted. If streaks and badges are on, which badges you earned and your best streaks. No names or notes for sessions are stored.
 - **Working state.** The website being tracked right now, whether you are idle, the time of the last save, which limit notifications were already sent today, and the day housekeeping last ran. This lets tracking carry on correctly after Chrome restarts.
 
 ## What BrowseWise does not store
@@ -55,7 +56,7 @@ When you choose **Export**, BrowseWise creates a file that your browser saves to
 ## Keeping and deleting your data
 
 - By default BrowseWise keeps up to one year of history and deletes older days automatically. You can choose a different length in Settings.
-- **Clear history** deletes all recorded time. **Delete everything** deletes all of BrowseWise's data and resets its settings.
+- **Clear history** deletes all recorded time, and the focus sessions, streaks and badges. **Delete everything** deletes all of BrowseWise's data and resets its settings.
 - Uninstalling the extension removes its stored data, because Chrome clears an extension's storage when it is removed.
 
 ## Children

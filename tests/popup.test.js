@@ -116,6 +116,63 @@ describe('renderPopup', () => {
   });
 });
 
+describe('the focus timer slot', () => {
+  const slot = () => {
+    const element = document.createElement('section');
+    element.className = 'pp-focus';
+    element.textContent = 'timer';
+    return element;
+  };
+
+  it('is shown under the header, above the content, in every state', () => {
+    for (const state of [
+      { status: 'loading' },
+      { status: 'error', message: 'Boom' },
+      { status: 'ready', overview: overviewOf({}) },
+      { status: 'ready', overview: overviewOf({ 'a.com': 5 * MIN }) },
+    ]) {
+      const focusSlot = slot();
+      renderPopup(root, state, { ...handlers(), focusSlot });
+      const children = [...root.children];
+      expect(children).toContain(focusSlot);
+      expect(children.indexOf(focusSlot)).toBe(1);
+      expect(children[0].classList.contains('pp-header')).toBe(true);
+    }
+  });
+
+  it('is the same element after a redraw, so the countdown is never reset', () => {
+    const focusSlot = slot();
+    renderPopup(root, { status: 'loading' }, { ...handlers(), focusSlot });
+    renderPopup(
+      root,
+      { status: 'ready', overview: overviewOf({ 'a.com': 5 * MIN }) },
+      { ...handlers(), focusSlot },
+    );
+    expect(root.querySelectorAll('.pp-focus')).toHaveLength(1);
+    expect(root.querySelector('.pp-focus')).toBe(focusSlot);
+  });
+
+  it('is optional', () => {
+    renderPopup(root, { status: 'ready', overview: overviewOf({}) }, handlers());
+    expect(root.querySelector('.pp-focus')).toBeNull();
+    expect(root.querySelector('.pp-header')).not.toBeNull();
+  });
+
+  it('is passed through by the controller', async () => {
+    const focusSlot = slot();
+    const controller = createPopupController({
+      root,
+      loadOverview: async () => overviewOf({ 'a.com': 5 * MIN }),
+      requestLiveFlush: async () => {},
+      openDashboard: vi.fn(),
+      now: () => NOW,
+      focusSlot,
+    });
+    await controller.start();
+    expect(root.querySelector('.pp-focus')).toBe(focusSlot);
+  });
+});
+
 describe('createPopupController', () => {
   function setup(overrides = {}) {
     const deps = {

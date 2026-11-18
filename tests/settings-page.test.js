@@ -129,12 +129,21 @@ describe('settings page: layout and loading', () => {
     const sections = [...container.querySelectorAll('section.db-config')].map((s) =>
       s.getAttribute('aria-label'),
     );
-    expect(sections).toEqual(['Tracking', 'History', 'Notifications', 'Your data', 'Privacy']);
+    expect(sections).toEqual([
+      'Tracking',
+      'Focus timer',
+      'History',
+      'Notifications',
+      'Your data',
+      'Privacy',
+    ]);
     expect(container.querySelector('.db-version').textContent).toBe('BrowseWise 0.1.0');
 
     const privacy = container.querySelector('section[aria-label="Privacy"]').textContent;
     expect(privacy).toContain('Stored on this device');
     expect(privacy).toContain('Never stored');
+    expect(privacy).toContain('How many focus sessions you completed each day');
+    expect(privacy).toContain('No names or notes');
     expect(privacy).toContain('Full web addresses or page titles');
     expect(privacy).toContain('anything you type, including passwords');
     expect(privacy).toContain('private (Incognito) windows');
@@ -392,7 +401,7 @@ describe('settings page: history length', () => {
     await ready();
     choose(byId('retention-days'), '30');
     await vi.waitFor(() => expect(deps.confirm).toHaveBeenCalled());
-    expect(deps.confirm.mock.calls[0][0].message).toContain('permanently deletes 1 day of');
+    expect(deps.confirm.mock.calls[0][0].message).toContain('permanently deletes 1 day of history');
     expect(deps.confirm.mock.calls[0][0].message).toContain('that is older');
     expect(deps.confirm.mock.calls[0][0].confirmLabel).toBe('Delete 1 day');
   });
@@ -587,6 +596,7 @@ describe('settings page: deleting data', () => {
     const options = deps.confirm.mock.calls[0][0];
     expect(options.title).toBe('Clear all history?');
     expect(options.message).toContain('12 days');
+    expect(options.message).toContain('and your focus sessions, streaks and badges');
     expect(options.message).toContain('settings, goals, limits and category choices are kept');
     expect(options.danger).toBe(true);
     await vi.waitFor(() => expect(deps.requestErase).toHaveBeenCalledWith('history'));
@@ -624,6 +634,7 @@ describe('settings page: deleting data', () => {
     await vi.waitFor(() => expect(deps.confirm).toHaveBeenCalledTimes(1));
     const options = deps.confirm.mock.calls[0][0];
     expect(options.title).toBe('Delete all BrowseWise data?');
+    expect(options.message).toContain('focus sessions and badges');
     expect(options.message).toContain('goals and limits, category choices and settings');
     expect(options.confirmLabel).toBe('Delete everything');
 

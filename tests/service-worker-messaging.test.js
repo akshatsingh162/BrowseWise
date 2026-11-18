@@ -31,6 +31,7 @@ async function loadWorker() {
       onAlarm: event('g'),
       get: vi.fn(async () => ({ name: 'browsewise-heartbeat' })),
       create: vi.fn(async () => {}),
+      clear: vi.fn(async () => true),
     },
   });
   chrome.storage.onChanged = event('h');

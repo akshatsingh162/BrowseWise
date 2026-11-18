@@ -10,4 +10,9 @@ export const MESSAGE_TYPES = Object.freeze({
    * The worker runs it inside its own task queue so tracking cannot write halfway.
    */
   ERASE_DATA: 'ERASE_DATA',
+  /**
+   * UI -> service worker: control the focus timer. Carries `{ action }`, one of start,
+   * pause, resume, stop, skip or sync. The worker is the only writer of timer state.
+   */
+  FOCUS_COMMAND: 'FOCUS_COMMAND',
 });

@@ -6,6 +6,8 @@ import {
 import { showTestNotification } from '../shared/notifier.js';
 import { downloadTextFile } from '../shared/download.js';
 import { requestErase } from '../shared/data-erase.js';
+import { sendFocusCommand } from '../shared/focus-client.js';
+import { subscribeToFocusChanges } from '../shared/storage/focus-repo.js';
 import { setCategoryOverride } from '../shared/storage/category-repo.js';
 import {
   acknowledgeCurrentlyExceeded,
@@ -20,8 +22,10 @@ import { createChart } from './charts/chart-factory.js';
 import { readChartTheme } from './charts/chart-theme.js';
 import { loadGoalsData } from './goals-data.js';
 import { loadOverviewData, loadWebsiteUsage } from './data.js';
+import { loadFocusData } from './focus-data.js';
 import { loadHistoryOverview, loadSiteHistory } from './history-data.js';
 import { mountAnalyticsPage } from './pages/analytics.js';
+import { mountFocusPage } from './pages/focus.js';
 import { mountGoalsPage } from './pages/goals.js';
 import { mountHistoryPage } from './pages/history.js';
 import { mountOverviewPage } from './pages/overview.js';
@@ -61,6 +65,22 @@ const PAGES = {
       loadSiteHistory,
       createChart,
       readTheme: readChartTheme,
+    }),
+  focus: (container) =>
+    mountFocusPage(container, {
+      ...liveDeps,
+      loadFocusData,
+      sendFocusCommand,
+      updateSettings,
+      // The page shows browsing-based numbers (goal streaks) and the timer, so it listens to both.
+      subscribe: (callback) => {
+        const stopUsage = liveDeps.subscribe(callback);
+        const stopFocus = subscribeToFocusChanges(callback);
+        return () => {
+          stopUsage();
+          stopFocus();
+        };
+      },
     }),
   goals: (container) =>
     mountGoalsPage(container, {
