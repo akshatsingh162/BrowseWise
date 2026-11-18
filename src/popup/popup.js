@@ -1,8 +1,10 @@
 import '../ui/styles/tokens.css';
 import '../ui/styles/base.css';
 import '../ui/styles/components.css';
+import '../ui/styles/ambient.css';
 import './popup.css';
 
+import { mountAmbient } from '../ui/ambient.js';
 import { requestLiveFlush } from '../shared/live-flush.js';
 import { shiftDateKey } from '../shared/dates.js';
 import { openDashboard } from '../shared/navigation.js';
@@ -20,6 +22,8 @@ async function loadOverview(now) {
   const [today, yesterday] = await getUsageForRange([todayKey, shiftDateKey(todayKey, -1)]);
   return buildOverview({ today, yesterday, now });
 }
+
+mountAmbient();
 
 const controller = createPopupController({
   root: document.getElementById('app'),
