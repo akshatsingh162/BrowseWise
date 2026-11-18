@@ -6,6 +6,8 @@ import { DEFAULT_SETTINGS, SETTINGS_LIMITS } from '../../shared/storage/schema.j
 import { el } from '../../ui/dom.js';
 import { icon } from '../../ui/icons.js';
 import { confirmDialog } from '../components/confirm-dialog.js';
+import { createFocusSettings } from '../components/focus-settings.js';
+import { switchRow } from '../components/switch-row.js';
 import { createDataView } from '../components/data-view.js';
 import { pageHeader } from '../components/page-header.js';
 
@@ -52,25 +54,6 @@ function section(title, description, ...children) {
     description && el('p', { class: 'db-config-desc', text: description }),
     ...children,
   ]);
-}
-
-/** A labelled on/off switch with a line of explanation. */
-function switchRow({ id, label, description }) {
-  const button = el('button', {
-    type: 'button',
-    class: 'bw-switch',
-    role: 'switch',
-    id,
-    'aria-checked': 'false',
-    'aria-describedby': `${id}-help`,
-  });
-  return {
-    button,
-    element: el('div', { class: 'db-switch-block' }, [
-      el('div', { class: 'db-switch-row' }, [button, el('label', { for: id, text: label })]),
-      el('p', { class: 'db-config-desc', id: `${id}-help`, text: description }),
-    ]),
-  };
 }
 
 function privacyList(title, items) {
@@ -249,6 +232,8 @@ export function mountSettingsPage(
       }
     });
   }
+  const focusSettings = createFocusSettings({ updateSettings, announce });
+
   wireSwitch(audibleSwitch, 'countAudibleTabsAsActive', 'Count tabs playing sound as active');
   wireSwitch(localSwitch, 'trackLocalHosts', 'Track local websites');
 
@@ -296,7 +281,7 @@ export function mountSettingsPage(
       if (expired > 0) {
         const confirmed = await confirm({
           title: `Keep only ${retentionLabel(next).replace(' (default)', '')}?`,
-          message: `This permanently deletes ${plural(expired, 'day', 'days')} of recorded browsing time that ${expired === 1 ? 'is' : 'are'} older than that. It happens right away and cannot be undone. Export your data first if you want a copy.`,
+          message: `This permanently deletes ${plural(expired, 'day', 'days')} of history (browsing time and focus sessions) that ${expired === 1 ? 'is' : 'are'} older than that. It happens right away and cannot be undone. Export your data first if you want a copy.`,
           confirmLabel: `Delete ${plural(expired, 'day', 'days')}`,
           danger: true,
         });
@@ -419,7 +404,7 @@ export function mountSettingsPage(
     const days = latest?.summary.dayCount ?? 0;
     const confirmed = await confirm({
       title: 'Clear all history?',
-      message: `This permanently deletes the time recorded for every website (${plural(days, 'day', 'days')}). Your settings, goals, limits and category choices are kept. It cannot be undone. Export your data first if you want a copy.`,
+      message: `This permanently deletes the time recorded for every website (${plural(days, 'day', 'days')}), and your focus sessions, streaks and badges. Your settings, goals, limits and category choices are kept. It cannot be undone. Export your data first if you want a copy.`,
       confirmLabel: 'Clear history',
       danger: true,
     });
@@ -443,7 +428,7 @@ export function mountSettingsPage(
     const confirmed = await confirm({
       title: 'Delete all BrowseWise data?',
       message:
-        'This permanently deletes your browsing history, goals and limits, category choices and settings, and puts BrowseWise back to how it was when you installed it. It cannot be undone. Export your data first if you want a copy.',
+        'This permanently deletes your browsing history, focus sessions and badges, goals and limits, category choices and settings, and puts BrowseWise back to how it was when you installed it. It cannot be undone. Export your data first if you want a copy.',
       confirmLabel: 'Delete everything',
       danger: true,
     });
@@ -456,6 +441,7 @@ export function mountSettingsPage(
       // optional permission is released as well. A failure here is not fatal.
       await removeNotificationsPermission();
       idleDirty = false;
+      focusSettings.resetDirty();
       announce('Everything was deleted. Settings are back to their defaults.');
     } catch (error) {
       console.error('[BrowseWise] could not delete all data', error);
@@ -479,6 +465,7 @@ export function mountSettingsPage(
     ]) {
       control.disabled = disabled;
     }
+    focusSettings.setDisabled(disabled);
     for (const button of actionButtons) button.disabled = disabled;
   }
 
@@ -490,6 +477,7 @@ export function mountSettingsPage(
     if (!idleDirty && !idleForm.contains(document.activeElement)) {
       idleInput.value = String(settings.idleThresholdSeconds);
     }
+    focusSettings.sync(settings);
     audibleSwitch.button.setAttribute('aria-checked', String(settings.countAudibleTabsAsActive));
     localSwitch.button.setAttribute('aria-checked', String(settings.trackLocalHosts));
 
@@ -549,6 +537,11 @@ export function mountSettingsPage(
       localSwitch.element,
     ),
     section(
+      'Focus timer',
+      'Lengths for the focus timer on the Focus page and in the popup.',
+      focusSettings.element,
+    ),
+    section(
       'History',
       'What is stored on this device, and how long it is kept.',
       summaryRegion,
@@ -603,7 +596,8 @@ export function mountSettingsPage(
         privacyList('Stored on this device', [
           'The domain of each website you use (for example youtube.com) and the active seconds spent there, per day and per hour.',
           'Your settings, goals and limits, and any category you changed.',
-          'A small note of what is being tracked right now and which limit notifications were already sent today.',
+          'How many focus sessions you completed each day and how long they lasted, and which badges you earned. No names or notes.',
+          'A small note of what is being tracked right now, the focus timer, and which limit notifications were already sent today.',
         ]),
         privacyList('Never stored', [
           'Full web addresses or page titles.',

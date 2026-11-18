@@ -214,3 +214,69 @@ body {
   font-size: var(--bw-text-xs);
   text-align: center;
 }
+
+/* ---------- Focus timer ---------- */
+
+.pp-focus {
+  margin: 0 var(--bw-space-4) var(--bw-space-3);
+  padding: var(--bw-space-3) var(--bw-space-4);
+}
+
+.pp-focus-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bw-space-3);
+}
+
+.pp-focus-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pp-focus-label {
+  color: var(--bw-text-muted);
+  font-size: var(--bw-text-xs);
+  font-weight: 600;
+}
+
+.pp-focus-time {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.pp-focus[data-tone='focus'] .pp-focus-time {
+  color: #ffffff;
+}
+
+.pp-focus[data-tone='break'] .pp-focus-time {
+  color: rgb(var(--bw-glow-ember));
+}
+
+.pp-focus[data-tone='paused'] .pp-focus-time,
+.pp-focus[data-tone='idle'] .pp-focus-time {
+  color: var(--bw-text-muted);
+}
+
+.pp-focus-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--bw-space-1);
+}
+
+.pp-focus-primary {
+  padding-inline: var(--bw-space-3);
+}
+
+.pp-focus-error {
+  margin-top: var(--bw-space-2);
+  color: var(--bw-danger);
+  font-size: var(--bw-text-xs);
+}
+
+.pp-focus-error:empty {
+  display: none;
+}

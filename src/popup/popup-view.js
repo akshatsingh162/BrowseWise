@@ -183,5 +183,10 @@ export function renderPopup(root, state, handlers) {
     ]);
   }
 
-  root.replaceChildren(renderHeader(handlers), body, renderFooter(handlers));
+  root.replaceChildren(
+    renderHeader(handlers),
+    handlers.focusSlot ?? null,
+    body,
+    renderFooter(handlers),
+  );
 }

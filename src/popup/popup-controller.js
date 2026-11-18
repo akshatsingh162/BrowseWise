@@ -14,6 +14,8 @@ import { renderPopup } from './popup-view.js';
  * @param {() => Promise<void>} deps.requestLiveFlush
  * @param {() => Promise<void>|void} deps.openDashboard
  * @param {() => number} [deps.now]
+ * @param {HTMLElement|null} [deps.focusSlot] a long-lived element (the focus timer) shown under
+ *        the header on every redraw, so redrawing never resets the timer
  */
 export function createPopupController({
   root,
@@ -21,12 +23,17 @@ export function createPopupController({
   requestLiveFlush,
   openDashboard,
   now = Date.now,
+  focusSlot = null,
 }) {
   let state = { status: 'loading' };
   let latestRequest = 0;
 
   function render() {
-    renderPopup(root, state, { onRetry: () => refresh(), onOpenDashboard: handleOpenDashboard });
+    renderPopup(root, state, {
+      onRetry: () => refresh(),
+      onOpenDashboard: handleOpenDashboard,
+      focusSlot,
+    });
   }
 
   async function handleOpenDashboard() {

@@ -9,6 +9,7 @@ export const ROUTES = Object.freeze([
   Object.freeze({ id: 'analytics', label: 'Analytics', icon: 'chart-column' }),
   Object.freeze({ id: 'websites', label: 'Websites', icon: 'globe' }),
   Object.freeze({ id: 'history', label: 'History', icon: 'history' }),
+  Object.freeze({ id: 'focus', label: 'Focus', icon: 'timer' }),
   Object.freeze({ id: 'goals', label: 'Goals & limits', icon: 'target' }),
   Object.freeze({ id: 'settings', label: 'Settings', icon: 'settings' }),
 ]);

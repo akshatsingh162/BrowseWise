@@ -2,6 +2,7 @@ import { exportRangeStartKey, filterDaysFrom } from '../shared/export.js';
 import { hasNotificationsPermission } from '../shared/notifications-permission.js';
 import { countDaysBefore, retentionCutoffKey } from '../shared/retention.js';
 import { getStorageUsage } from '../shared/storage-usage.js';
+import { getAchievements, getAllFocusDays } from '../shared/storage/focus-repo.js';
 import { getCategoryOverrides } from '../shared/storage/category-repo.js';
 import { getGoals } from '../shared/storage/goals-repo.js';
 import { getSettings } from '../shared/storage/settings-repo.js';
@@ -46,14 +47,24 @@ export async function loadSettingsData({
 export async function collectExportData(rangeId, now) {
   const startKey = exportRangeStartKey(rangeId, toLocalDateKey(now));
   const keys = await listUsageDateKeys();
-  const [allDays, categoryOverrides, goals, settings] = await Promise.all([
-    getUsageForRange(keys),
-    getCategoryOverrides(),
-    getGoals(),
-    getSettings(),
-  ]);
+  const [allDays, categoryOverrides, goals, settings, allFocusDays, achievements] =
+    await Promise.all([
+      getUsageForRange(keys),
+      getCategoryOverrides(),
+      getGoals(),
+      getSettings(),
+      getAllFocusDays(),
+      getAchievements(),
+    ]);
 
-  return { days: filterDaysFrom(allDays, startKey), categoryOverrides, goals, settings };
+  return {
+    days: filterDaysFrom(allDays, startKey),
+    categoryOverrides,
+    goals,
+    settings,
+    focusDays: allFocusDays.filter((day) => startKey === null || day.date >= startKey),
+    achievements,
+  };
 }
 
 /**
@@ -64,6 +75,8 @@ export async function collectExportData(rangeId, now) {
  * @param {number} now epoch ms
  */
 export async function countDaysToDelete(retentionDays, now) {
-  const keys = await listUsageDateKeys();
-  return countDaysBefore(keys, retentionCutoffKey(toLocalDateKey(now), retentionDays));
+  // A day counts once, even if it has both browsing time and focus sessions.
+  const dates = new Set(await listUsageDateKeys());
+  for (const day of await getAllFocusDays()) dates.add(day.date);
+  return countDaysBefore([...dates], retentionCutoffKey(toLocalDateKey(now), retentionDays));
 }

@@ -1023,3 +1023,366 @@
   flex: none;
   margin-top: 2px;
 }
+
+/* ---------- Focus page ---------- */
+
+.fo-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+  grid-template-areas:
+    'timer side'
+    'badges badges';
+  gap: var(--bw-space-5);
+  align-items: start;
+}
+
+/* The data region and its wrapper only group things; their children sit in the page grid. */
+.fo-results,
+.fo-data {
+  display: contents;
+}
+
+.fo-timer-card {
+  grid-area: timer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--bw-space-4);
+  padding: var(--bw-space-6) var(--bw-space-5);
+  text-align: center;
+}
+
+.fo-side {
+  grid-area: side;
+  display: flex;
+  flex-direction: column;
+  gap: var(--bw-space-4);
+  min-width: 0;
+}
+
+.fo-badges,
+.fo-hidden-note {
+  grid-area: badges;
+}
+
+.fo-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* The ring */
+
+.fo-ring {
+  --ring-color: var(--bw-accent);
+  position: relative;
+  width: 232px;
+  height: 232px;
+}
+
+.fo-ring[data-tone='break'] {
+  --ring-color: rgb(var(--bw-glow-ember));
+}
+
+.fo-ring[data-tone='paused'] {
+  --ring-color: var(--bw-text-faint);
+}
+
+.fo-ring[data-tone='idle'] {
+  --ring-color: rgba(255, 255, 255, 0.55);
+}
+
+.fo-ring-track {
+  stroke: rgba(255, 255, 255, 0.08);
+}
+
+.fo-ring-progress {
+  stroke: var(--ring-color);
+  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--ring-color) 55%, transparent));
+  transition:
+    stroke-dashoffset 300ms linear,
+    stroke 300ms var(--bw-ease);
+}
+
+.fo-ring-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.fo-ring-phase {
+  color: var(--bw-text-muted);
+  font-size: var(--bw-text-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.fo-ring-time {
+  background: linear-gradient(180deg, #ffffff 25%, #a9a9b4 130%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: 46px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.fo-ring-note {
+  color: var(--bw-text-faint);
+  font-size: var(--bw-text-xs);
+}
+
+@media (forced-colors: active) {
+  .fo-ring-time {
+    background: none;
+    color: CanvasText;
+  }
+}
+
+/* Dots: filled and outlined, so progress never depends on colour. */
+
+.fo-dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--bw-space-2);
+}
+
+.fo-dot {
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  transition: background-color 240ms var(--bw-ease);
+}
+
+.fo-dot.is-filled {
+  border-color: #ffffff;
+  background: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.fo-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--bw-space-2);
+}
+
+.fo-error:empty {
+  display: none;
+}
+
+.fo-length {
+  display: flex;
+  align-items: center;
+  gap: var(--bw-space-3);
+  color: var(--bw-text-muted);
+  font-size: var(--bw-text-sm);
+}
+
+/* This week */
+
+.fo-week {
+  padding: var(--bw-space-5);
+}
+
+.fo-week-bars {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--bw-space-3);
+  margin: var(--bw-space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fo-week-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.fo-week-track {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  height: 68px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+  overflow: hidden;
+}
+
+.fo-week-bar {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  background: rgba(255, 255, 255, 0.18);
+  transition: height 400ms var(--bw-ease);
+}
+
+.fo-week-bar.has-sessions {
+  background: linear-gradient(180deg, #ffffff, rgba(255, 255, 255, 0.55));
+}
+
+.fo-week-count {
+  font-size: var(--bw-text-sm);
+  font-weight: 600;
+}
+
+.fo-week-label {
+  color: var(--bw-text-faint);
+  font-size: var(--bw-text-xs);
+}
+
+/* Badges */
+
+.fo-badges-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--bw-space-3);
+  margin-bottom: var(--bw-space-2);
+}
+
+.fo-badges-count {
+  color: var(--bw-text-muted);
+  font-size: var(--bw-text-sm);
+}
+
+.fo-badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--bw-space-3);
+  margin: var(--bw-space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fo-badge {
+  --tier: 214, 214, 222;
+  display: flex;
+  gap: var(--bw-space-4);
+  padding: var(--bw-space-4);
+}
+
+.fo-badge[data-tier='bronze'] {
+  --tier: 214, 156, 110;
+}
+
+.fo-badge[data-tier='silver'] {
+  --tier: 214, 219, 229;
+}
+
+.fo-badge[data-tier='gold'] {
+  --tier: 240, 205, 120;
+}
+
+.fo-badge-medal {
+  position: relative;
+  display: grid;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid rgba(var(--tier), 0.65);
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, rgba(var(--tier), 0.38), rgba(var(--tier), 0.08));
+  box-shadow: 0 0 18px -4px rgba(var(--tier), 0.5);
+  color: rgb(var(--tier));
+  overflow: hidden;
+}
+
+.fo-badge.is-locked .fo-badge-medal {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: none;
+  color: var(--bw-text-faint);
+}
+
+.fo-badge-lock {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  display: grid;
+  width: 17px;
+  height: 17px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--bw-surface-raised);
+  color: var(--bw-text-muted);
+}
+
+/* A glint sweeps across an earned badge on hover. */
+.fo-badge.is-earned .fo-badge-medal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 65%
+  );
+  transform: translateX(-130%);
+  transition: transform 700ms var(--bw-ease);
+}
+
+.fo-badge.is-earned:hover .fo-badge-medal::after {
+  transform: translateX(130%);
+}
+
+.fo-badge-body {
+  min-width: 0;
+}
+
+.fo-badge-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bw-space-2);
+}
+
+.fo-badge-title {
+  font-size: var(--bw-text-base);
+  font-weight: 650;
+}
+
+.fo-badge-desc {
+  margin-top: 2px;
+  color: var(--bw-text-muted);
+  font-size: var(--bw-text-sm);
+}
+
+.fo-badge-status {
+  margin-top: var(--bw-space-2);
+  color: var(--bw-text-faint);
+  font-size: var(--bw-text-xs);
+}
+
+.fo-badge.is-earned .fo-badge-status {
+  color: rgb(var(--tier));
+}
+
+.fo-badge-bar {
+  margin-top: 6px;
+}
+
+/* Settings: the focus timer lengths */
+
+.fo-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: var(--bw-space-4);
+}
+
+@media (max-width: 900px) {
+  .fo-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'timer'
+      'side'
+      'badges';
+  }
+}
