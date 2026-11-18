@@ -29,7 +29,7 @@ The 16 px and 32 px icons use slightly larger letters (about 16%) so the mark st
 
 - Keep clear space of at least a quarter of the tile's width on all sides.
 - Do not stretch, recolour, rotate, or add effects.
-- On the dark interface the blue tile is used as is. The interface accent colour (indigo) is separate from the brand blue.
+- On the dark interface the blue tile is used as is. The interface is neutral graphite with a near-white accent, which is separate from the brand blue and lets the logo stand out.
 
 ### Chrome Web Store note
 
