@@ -45,3 +45,45 @@ export function showTestNotification() {
     'BrowseWise will notify you like this when you reach a goal or limit.',
   );
 }
+
+const minutesOf = (ms) => Math.round(ms / 60_000);
+
+/**
+ * Tells the user a focus session or a break has finished.
+ * @param {{completion: {phase: string, durationMs: number, sessionId: string},
+ *          next: {phase: string, status: string, durationMs: number}|null}} details
+ */
+export function showFocusNotification({ completion, next }) {
+  const id = `${NOTIFICATION_PREFIX}focus-${completion.sessionId}`;
+
+  if (completion.phase === 'focus') {
+    const focused = `You focused for ${minutesOf(completion.durationMs)} minutes.`;
+    if (!next) return show(id, 'Focus session complete', focused);
+    const kind = next.phase === 'longBreak' ? 'long break' : 'short break';
+    const length = `${minutesOf(next.durationMs)}-minute ${kind}`;
+    return show(
+      id,
+      'Focus session complete',
+      next.status === 'running'
+        ? `${focused} Your ${length} has started.`
+        : `${focused} Time for a ${length}.`,
+    );
+  }
+
+  return show(
+    id,
+    'Break over',
+    next?.status === 'running'
+      ? 'Your next focus session has started.'
+      : 'Ready for the next focus session?',
+  );
+}
+
+/** Tells the user a badge was earned. @param {{id: string, title: string, description: string}} badge */
+export function showBadgeNotification(badge) {
+  return show(
+    `${NOTIFICATION_PREFIX}badge-${badge.id}`,
+    `New badge: ${badge.title}`,
+    badge.description,
+  );
+}

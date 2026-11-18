@@ -1,4 +1,5 @@
 import { retentionCutoffKey } from '../shared/retention.js';
+import { pruneFocusDaysBefore } from '../shared/storage/focus-repo.js';
 import { withStorageLock } from '../shared/storage/lock.js';
 import { getSettings } from '../shared/storage/settings-repo.js';
 import { pruneUsageBefore } from '../shared/storage/usage-repo.js';
@@ -30,7 +31,10 @@ export async function runMaintenance({ now = Date.now(), force = false } = {}) {
   }
 
   const { retentionDays } = await getSettings();
-  const removedDays = await pruneUsageBefore(retentionCutoffKey(todayKey, retentionDays));
+  const cutoff = retentionCutoffKey(todayKey, retentionDays);
+  const removedDays = await pruneUsageBefore(cutoff);
+  // Focus days follow the same retention. Earned badges and best streaks are kept.
+  await pruneFocusDaysBefore(cutoff);
 
   await withStorageLock(() =>
     chrome.storage.local.set({ [MAINTENANCE_KEY]: { lastRunDate: todayKey } }),

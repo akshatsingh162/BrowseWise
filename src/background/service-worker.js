@@ -7,6 +7,8 @@ import { STORAGE_KEYS } from '../shared/storage/schema.js';
 import { getSettings } from '../shared/storage/settings-repo.js';
 import { errorMessage, reportFailure } from './errors.js';
 import { checkLimits } from './limits-monitor.js';
+import { FOCUS_ALARM, focusTick, restoreFocusAlarm, runFocusCommand } from './focus.js';
+import { FOCUS_ACTIONS } from '../shared/focus-client.js';
 import { runMaintenance } from './maintenance.js';
 import { syncTracking } from './sync.js';
 
@@ -43,10 +45,11 @@ function enqueue(label, task) {
 function enqueueWithResult(label, task) {
   const result = queue.then(async () => {
     try {
-      await task();
-      return { ok: true };
+      const value = await task();
+      return value === undefined ? { ok: true } : { ok: true, value };
     } catch (error) {
-      reportFailure(label, error);
+      // A refused request (for example skipping a focus session) is a normal answer, not a fault.
+      if (!error?.expected) reportFailure(label, error);
       return { ok: false, error: errorMessage(error) };
     }
   });
@@ -67,6 +70,16 @@ async function trackAndCheckLimits(request) {
     reportFailure('limit check', error);
   }
   await maintain({ now: request.now });
+  await tickFocus({ now: request.now });
+}
+
+/** Settles a focus phase whose alarm was late, and closes finished days. Never breaks tracking. */
+async function tickFocus(options) {
+  try {
+    await focusTick(options);
+  } catch (error) {
+    reportFailure('focus timer', error);
+  }
 }
 
 /** Deletes days past the retention setting (at most once a day unless forced). */
@@ -104,6 +117,11 @@ async function ensureHeartbeat() {
 async function prepare() {
   await applyIdleThreshold();
   await ensureHeartbeat();
+  try {
+    await restoreFocusAlarm();
+  } catch (error) {
+    reportFailure('focus alarm', error);
+  }
 }
 
 // --- Lifecycle -------------------------------------------------------------
@@ -161,6 +179,10 @@ chrome.idle.onStateChanged.addListener((idleState) => {
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === HEARTBEAT_ALARM) void track('heartbeat');
+  if (alarm.name === FOCUS_ALARM) {
+    const now = Date.now();
+    void enqueue('focus alarm', () => runFocusCommand('sync', { now }));
+  }
 });
 
 // Settings can change from the dashboard (a different context): re-apply them.
@@ -218,6 +240,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  if (message?.type === MESSAGE_TYPES.FOCUS_COMMAND) {
+    if (!FOCUS_ACTIONS.includes(message.action)) {
+      sendResponse({ ok: false, error: 'Unknown focus action.' });
+      return false;
+    }
+    const now = Date.now();
+    void enqueueWithResult('focus command', () => runFocusCommand(message.action, { now })).then(
+      (result) =>
+        sendResponse(
+          result.ok ? { ok: true, state: result.value.state } : { ok: false, error: result.error },
+        ),
+    );
+    return true;
+  }
+
   return false;
 });
 
@@ -234,7 +271,9 @@ let notificationHandlersRegistered = false;
 function handleNotificationClick(notificationId) {
   if (!notificationId.startsWith(NOTIFICATION_PREFIX)) return;
   chrome.notifications.clear(notificationId);
-  void openDashboard('goals').catch((error) => {
+  // Focus and badge notifications open the Focus page; goal and limit ones open Goals.
+  const page = /^browsewise-(focus|badge)-/.test(notificationId) ? 'focus' : 'goals';
+  void openDashboard(page).catch((error) => {
     reportFailure('opening the dashboard from a notification', error);
   });
 }
