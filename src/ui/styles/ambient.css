@@ -260,7 +260,26 @@
   }
 }
 
+/* The navigation dock rises into place when the dashboard opens. */
+@keyframes bw-dock-in {
+  from {
+    opacity: 0;
+    translate: 0 36px;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
+  .dk-wrap {
+    /* `backwards`, not `both`: a finished animation that keeps holding a value would keep the
+       wrapper from letting the buttons blur the page behind them. */
+    animation: bw-dock-in 700ms var(--bw-ease) 150ms backwards;
+  }
+
   .bw-confetti-piece {
     animation: bw-confetti 1600ms cubic-bezier(0.2, 0.6, 0.35, 1) var(--delay, 0ms) both;
   }

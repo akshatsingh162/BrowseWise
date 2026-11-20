@@ -130,3 +130,55 @@ describe('design tokens', () => {
     expect(/--bw-accent:\s*#[0-9a-f]{6};/i.test(css.tokens)).toBe(true);
   });
 });
+
+describe('navigation dock', () => {
+  const rule = (selector) =>
+    new RegExp(`${selector.replace(/[.]/g, '\\.')} \\{[^}]*\\}`).exec(css.dashboard)?.[0] ?? '';
+
+  it('has no bar: the wrapper and the row draw nothing, only the buttons do', () => {
+    for (const selector of ['.dk-wrap', '.dk']) {
+      const block = rule(selector);
+      expect(block, selector).not.toBe('');
+      expect(block, selector).not.toMatch(/background|border|box-shadow|backdrop-filter/);
+    }
+  });
+
+  it('lets clicks through the wrapper and the row, and only the buttons take them', () => {
+    expect(rule('.dk-wrap')).toContain('pointer-events: none');
+    expect(rule('.dk')).toContain('pointer-events: none');
+    expect(rule('.dk-item')).toContain('pointer-events: auto');
+  });
+
+  it('is fixed to the window, so the page keeps the whole width', () => {
+    expect(rule('.dk-wrap')).toContain('position: fixed');
+    expect(css.dashboard).not.toMatch(/\.db-sidebar|grid-template-columns:\s*\d+px\s+1fr/);
+  });
+
+  it('gives each button a blurred, mostly opaque backing, so text under it never competes with its icon', () => {
+    const block = rule('.dk-item');
+    expect(block).toContain('backdrop-filter');
+    const alpha = Number(
+      /background:\s*rgba\(\s*\d+,\s*\d+,\s*\d+,\s*([\d.]+)\s*\)/.exec(block)?.[1],
+    );
+    expect(alpha).toBeGreaterThanOrEqual(0.65);
+  });
+
+  it('does not let its entrance animation keep holding a value (that stopped the blur working)', () => {
+    // Comments explain the rule and may use these very words, so they are not part of the check.
+    const withoutComments = css.ambient.replace(/\/\*[\s\S]*?\*\//g, '');
+    const entrance = /\.dk-wrap \{[^}]*animation:[^;]*;/.exec(withoutComments)?.[0] ?? '';
+    expect(entrance).toContain('bw-dock-in');
+    expect(entrance).toMatch(/backwards\s*;/);
+    expect(entrance).not.toMatch(/\bboth\b|forwards/);
+  });
+
+  it('keeps the dock reachable with the keyboard when it is hidden', () => {
+    const hiddenRule = /\.dk\[data-hidden='true'\] \{[^}]*\}/.exec(css.dashboard)?.[0] ?? '';
+    expect(hiddenRule).not.toMatch(/display:\s*none|visibility:\s*hidden/);
+  });
+
+  it('shows a clear focus ring on every dock and corner button', () => {
+    expect(css.dashboard).toMatch(/\.dk-item:focus-visible \{[^}]*outline: 2px solid/);
+    expect(css.dashboard).toMatch(/\.dk-corner:focus-visible \{[^}]*outline: 2px solid/);
+  });
+});

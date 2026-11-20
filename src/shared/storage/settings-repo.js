@@ -51,6 +51,7 @@ export function sanitizeSettings(raw) {
     ),
     autoStartNext: bool('autoStartNext'),
     showAchievements: bool('showAchievements'),
+    dockAutoHide: bool('dockAutoHide'),
   };
 }
 

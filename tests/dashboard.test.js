@@ -7,6 +7,7 @@ import { mountWebsitesPage } from '../src/dashboard/pages/websites.js';
 import { ROUTES } from '../src/dashboard/router.js';
 import { createShell } from '../src/dashboard/shell.js';
 import { dayLong } from '../src/shared/labels.js';
+import { DEFAULT_SETTINGS } from '../src/shared/storage/schema.js';
 import { buildOverview, rankDomains, totalMs } from '../src/shared/stats.js';
 import { addUsage } from '../src/shared/storage/usage-repo.js';
 import { toLocalDateKey } from '../src/shared/time.js';
@@ -64,8 +65,56 @@ describe('shell', () => {
     createShell(container);
     const links = [...container.querySelectorAll('nav a')];
     expect(links.map((link) => link.getAttribute('href'))).toEqual(ROUTES.map((r) => `#${r.id}`));
-    expect(links.map((link) => link.textContent)).toEqual(ROUTES.map((r) => r.label));
+    // The visible words come from the label; tooltips are decoration and hidden from assistive technology.
+    expect(links.map((link) => link.querySelector('.dk-label').textContent)).toEqual(
+      ROUTES.map((r) => r.label),
+    );
+    for (const link of links)
+      expect(link.querySelector('.dk-tip').getAttribute('aria-hidden')).toBe('true');
     expect(container.querySelectorAll('main')).toHaveLength(1);
+  });
+
+  it('has no sidebar: the navigation is a labelled floating dock', () => {
+    createShell(container);
+    const nav = container.querySelector('nav');
+    expect(nav.getAttribute('aria-label')).toBe('Main');
+    expect(nav.classList.contains('dk')).toBe(true);
+    expect(container.querySelector('.db-sidebar')).toBeNull();
+    expect(container.querySelectorAll('nav')).toHaveLength(1);
+  });
+
+  it('puts the navigation before the content, so keyboard users reach it first', () => {
+    createShell(container);
+    const dock = container.querySelector('.dk-wrap');
+    const main = container.querySelector('main');
+    expect(dock.compareDocumentPosition(main) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('has a logo button to the Overview and a privacy button to Settings, both named', () => {
+    createShell(container);
+    const brand = container.querySelector('.dk-brand');
+    const privacy = container.querySelector('.dk-privacy');
+    expect(brand.getAttribute('href')).toBe('#overview');
+    expect(brand.getAttribute('aria-label')).toBe('BrowseWise, go to Overview');
+    expect(privacy.getAttribute('href')).toBe('#settings');
+    expect(privacy.getAttribute('aria-label')).toBe(
+      'Your data stays on this device. Open Settings.',
+    );
+    // The logo image is decoration: the link already has a name.
+    expect(brand.querySelector('img').getAttribute('alt')).toBe('');
+  });
+
+  it('removes the dock when the shell is destroyed', () => {
+    const shell = createShell(container);
+    shell.destroy();
+    expect(container.querySelector('.dk-wrap')).toBeNull();
+  });
+
+  it('passes the auto-hide setting to the dock', () => {
+    const shell = createShell(container, { autoHide: false });
+    expect(container.querySelector('.dk').dataset.autohide).toBe('false');
+    shell.setAutoHide(true);
+    expect(container.querySelector('.dk').dataset.autohide).toBe('true');
   });
 
   it('marks exactly the active page with aria-current', () => {
@@ -274,10 +323,14 @@ describe('websites page', () => {
 
 describe('startDashboard (smoke test with the real wiring)', () => {
   let dashboard;
+  let browserMock;
+  let storageListeners;
 
-  async function boot(hash) {
-    const { chrome: mock } = createBrowserMock();
+  async function boot(hash, storedSettings = null) {
+    const { chrome: mock } = createBrowserMock(storedSettings ? { settings: storedSettings } : {});
     const listeners = new Set();
+    browserMock = mock;
+    storageListeners = listeners;
     Object.assign(mock, {
       runtime: {
         getURL: (path) => `chrome-extension://abc/${path}`,
@@ -301,6 +354,54 @@ describe('startDashboard (smoke test with the real wiring)', () => {
     dashboard?.stop();
     dashboard = undefined;
     window.location.hash = '';
+  });
+
+  it('shows the navigation dock, hiding while scrolling by default', async () => {
+    await boot('#overview');
+    await vi.waitFor(() => expect(document.querySelector('.dk').dataset.autohide).toBe('true'));
+    expect(document.querySelectorAll('.dk-item')).toHaveLength(ROUTES.length);
+    expect(document.querySelector('.dk-item[aria-current="page"]').getAttribute('href')).toBe(
+      '#overview',
+    );
+  });
+
+  it('keeps the dock visible when the user turned auto-hide off', async () => {
+    await boot('#overview', { ...DEFAULT_SETTINGS, dockAutoHide: false });
+    await vi.waitFor(() => expect(document.querySelector('.dk').dataset.autohide).toBe('false'));
+  });
+
+  it('follows the dock setting when it changes in another tab', async () => {
+    await boot('#overview');
+    await vi.waitFor(() => expect(document.querySelector('.dk').dataset.autohide).toBe('true'));
+
+    // Another tab saves the setting; Chrome then tells this one that storage changed.
+    await browserMock.storage.local.set({ settings: { ...DEFAULT_SETTINGS, dockAutoHide: false } });
+    for (const listener of storageListeners) listener({ settings: {} }, 'local');
+
+    await vi.waitFor(() => expect(document.querySelector('.dk').dataset.autohide).toBe('false'));
+  });
+
+  it('jumps to a page with its number key, and stops listening after the dashboard stops', async () => {
+    await boot('#overview');
+    document.body.dispatchEvent(
+      new KeyboardEvent('keydown', { key: '3', bubbles: true, cancelable: true }),
+    );
+    await vi.waitFor(() => expect(document.querySelector('h1').textContent).toBe('Websites'));
+
+    dashboard.stop();
+    window.location.hash = '#overview';
+    document.body.dispatchEvent(
+      new KeyboardEvent('keydown', { key: '3', bubbles: true, cancelable: true }),
+    );
+    expect(window.location.hash).toBe('#overview');
+    dashboard = undefined;
+  });
+
+  it('removes the dock when the dashboard stops', async () => {
+    await boot('#overview');
+    dashboard.stop();
+    expect(document.querySelector('.dk-wrap')).toBeNull();
+    dashboard = undefined;
   });
 
   it('renders the page for the current hash and switches pages on navigation', async () => {

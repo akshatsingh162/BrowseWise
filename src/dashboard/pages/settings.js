@@ -232,10 +232,18 @@ export function mountSettingsPage(
       }
     });
   }
+  const dockSwitch = switchRow({
+    id: 'setting-dock-autohide',
+    label: 'Hide the navigation dock while scrolling down',
+    description:
+      'The dock slides away as you scroll down, to leave more room, and returns when you scroll up, move the mouse to the bottom edge, or press Tab. Turn this off to keep it always visible.',
+  });
+
   const focusSettings = createFocusSettings({ updateSettings, announce });
 
   wireSwitch(audibleSwitch, 'countAudibleTabsAsActive', 'Count tabs playing sound as active');
   wireSwitch(localSwitch, 'trackLocalHosts', 'Track local websites');
+  wireSwitch(dockSwitch, 'dockAutoHide', 'Hide the navigation dock while scrolling down');
 
   /* ---------- history length ---------- */
 
@@ -460,6 +468,7 @@ export function mountSettingsPage(
       idleSave,
       audibleSwitch.button,
       localSwitch.button,
+      dockSwitch.button,
       retentionSelect,
       exportRange,
     ]) {
@@ -480,6 +489,7 @@ export function mountSettingsPage(
     focusSettings.sync(settings);
     audibleSwitch.button.setAttribute('aria-checked', String(settings.countAudibleTabsAsActive));
     localSwitch.button.setAttribute('aria-checked', String(settings.trackLocalHosts));
+    dockSwitch.button.setAttribute('aria-checked', String(settings.dockAutoHide));
 
     currentRetention = settings.retentionDays;
     if (document.activeElement !== retentionSelect) syncRetentionOptions(currentRetention);
@@ -541,6 +551,7 @@ export function mountSettingsPage(
       'Lengths for the focus timer on the Focus page and in the popup.',
       focusSettings.element,
     ),
+    section('Appearance', 'How the dashboard looks and moves.', dockSwitch.element),
     section(
       'History',
       'What is stored on this device, and how long it is kept.',

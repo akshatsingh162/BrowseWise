@@ -9,7 +9,9 @@ The dashboard is a single extension page (`src/dashboard/dashboard.html`) with a
 | `dashboard.js`            | Entry point. Loads styles and calls `startDashboard`.                                |
 | `app.js`                  | `startDashboard(root)`: builds the shell, routes pages, returns `{ stop }`.          |
 | `router.js`               | Route list, `parseRoute`, `parseParams`, and a hash-change router.                   |
-| `shell.js`                | Sidebar navigation and the main content region.                                      |
+| `shell.js`                | The frame: the main content area, the navigation dock, and the two corner buttons.   |
+| `dock.js`                 | The floating navigation dock: current page, swelling, hiding while scrolling.        |
+| `shortcuts.js`            | Number keys 1 to 7 jump to the pages.                                                |
 | `data.js`, `*-data.js`    | Load and aggregate stored usage for each page (history, settings, goals, analytics). |
 | `components/data-view.js` | Loading, error, and ready states, live refresh, and out-of-order protection.         |
 | `components/*`            | Stat card, usage list, segmented control, page header, state card.                   |
@@ -41,7 +43,7 @@ Page controls (search box, range switch) live outside the data region, so refres
 
 ## Adding a page
 
-1. Add the route to `ROUTES` in `router.js` (with an icon registered in `src/ui/icons.js`). Order in `ROUTES` is the order in the sidebar.
+1. Add the route to `ROUTES` in `router.js` (with an icon registered in `src/ui/icons.js`). Order in `ROUTES` is the order of the dock buttons, and of the number keys.
 2. Create `pages/<name>.js` exporting `mount<Name>Page(container, deps)`.
 3. Register it in `PAGES` in `app.js`.
 

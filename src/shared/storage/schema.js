@@ -37,6 +37,8 @@ export const DEFAULT_SETTINGS = Object.freeze({
   longBreakEvery: 4,
   autoStartNext: false,
   showAchievements: true,
+  // The navigation dock slides away while scrolling down, to leave more room for content.
+  dockAutoHide: true,
 });
 
 export const SETTINGS_LIMITS = Object.freeze({

@@ -2,125 +2,279 @@
 
 /* ---------- Shell ---------- */
 
+/* There is no sidebar: the page uses the whole window. The navigation is a floating dock. */
 .db-shell {
-  display: grid;
-  grid-template-columns: 232px minmax(0, 1fr);
   min-height: 100vh;
-}
-
-.db-sidebar {
-  position: sticky;
-  top: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--bw-space-6);
-  height: 100vh;
-  padding: var(--bw-space-6) var(--bw-space-3) var(--bw-space-5);
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-  background: linear-gradient(180deg, rgba(14, 14, 17, 0.72), rgba(8, 8, 10, 0.82));
-  -webkit-backdrop-filter: blur(22px) saturate(120%);
-  backdrop-filter: blur(22px) saturate(120%);
-}
-
-.db-brand {
-  display: flex;
-  align-items: center;
-  gap: var(--bw-space-2);
-  padding: 0 var(--bw-space-2);
-}
-
-.db-logo {
-  display: block;
-  border-radius: 6px;
-}
-
-.db-brand-name {
-  font-size: var(--bw-text-md);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.db-logo {
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.12),
-    0 6px 18px -4px rgba(255, 255, 255, 0.22);
-}
-
-.db-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.db-nav-link {
-  display: flex;
-  align-items: center;
-  gap: var(--bw-space-3);
-  height: 36px;
-  padding: 0 var(--bw-space-3);
-  border-radius: var(--bw-radius-md);
-  color: var(--bw-text-muted);
-  font-weight: 500;
-  text-decoration: none;
-  transition:
-    background-color var(--bw-duration) var(--bw-ease),
-    color var(--bw-duration) var(--bw-ease);
-}
-
-.db-nav-link {
-  position: relative;
-}
-
-.db-nav-link:hover {
-  background: rgba(255, 255, 255, 0.055);
-  color: var(--bw-text);
-}
-
-.db-nav-link[aria-current='page'] {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.115), rgba(255, 255, 255, 0.04));
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07) inset;
-  color: var(--bw-text);
-}
-
-.db-nav-link[aria-current='page']::before {
-  content: '';
-  position: absolute;
-  left: -12px;
-  top: 9px;
-  bottom: 9px;
-  width: 3px;
-  border-radius: 0 3px 3px 0;
-  background: linear-gradient(180deg, #ffffff, rgba(var(--bw-glow-ember), 0.9));
-  box-shadow: 0 0 12px rgba(var(--bw-glow-ember), 0.55);
-}
-
-.db-nav-link[aria-current='page'] .bw-icon {
-  color: var(--bw-accent-text);
-}
-
-.db-sidebar-foot {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--bw-space-2);
-  margin-top: auto;
-  padding: var(--bw-space-3);
-  border: 1px solid var(--bw-border-glass);
-  border-radius: var(--bw-radius-md);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--bw-text-faint);
-  font-size: var(--bw-text-xs);
-}
-
-.db-sidebar-foot .bw-icon {
-  margin-top: 1px;
-  color: var(--bw-accent-text);
 }
 
 .db-main {
   width: 100%;
-  max-width: 1120px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 40px 40px 72px;
+  /* Room at the bottom so the dock never covers the end of a page. */
+  padding: 52px 64px 140px;
+}
+
+/* ---------- Navigation dock ---------- */
+
+/*
+ * Nothing here has a background except the buttons themselves. The wrapper and the row let
+ * clicks pass through to the page; only the buttons take them.
+ */
+.dk-wrap {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  padding: 0 12px calc(20px + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+}
+
+.dk {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--bw-space-2);
+  pointer-events: none;
+  transition:
+    transform 460ms var(--bw-ease),
+    opacity 300ms var(--bw-ease);
+}
+
+/* Hidden while scrolling down. It stays in the tab order, and focusing it brings it back. */
+.dk[data-hidden='true'] {
+  opacity: 0;
+  transform: translateY(calc(100% + 40px));
+}
+
+.dk-item {
+  --s: 1;
+  --lift: 0px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  min-width: 46px;
+  padding: 0 13px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 999px;
+  background: rgba(14, 14, 17, 0.72);
+  -webkit-backdrop-filter: blur(16px) saturate(135%);
+  backdrop-filter: blur(16px) saturate(135%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.07) inset,
+    0 12px 28px -10px rgba(0, 0, 0, 0.75);
+  color: var(--bw-text-muted);
+  text-decoration: none;
+  pointer-events: auto;
+  transform: translateY(var(--lift)) scale(var(--s));
+  transform-origin: 50% 100%;
+  transition:
+    background-color 200ms var(--bw-ease),
+    border-color 200ms var(--bw-ease),
+    color 200ms var(--bw-ease),
+    box-shadow 300ms var(--bw-ease);
+}
+
+.dk-item:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(34, 34, 40, 0.72);
+  color: var(--bw-text);
+}
+
+.dk-item:focus-visible {
+  outline: 2px solid var(--bw-accent);
+  outline-offset: 3px;
+}
+
+/* The name is always in the page for assistive technology; it is only drawn for the current page. */
+.dk-label {
+  max-width: 0;
+  margin-left: 0;
+  overflow: hidden;
+  opacity: 0;
+  font-size: var(--bw-text-base);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition:
+    max-width 420ms var(--bw-ease),
+    margin-left 420ms var(--bw-ease),
+    opacity 260ms var(--bw-ease);
+}
+
+.dk-item[aria-current='page'] {
+  border-color: transparent;
+  background: linear-gradient(180deg, #ffffff 0%, #e4e4ea 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 14px 34px -8px rgba(var(--bw-glow-ember), 0.6),
+    0 6px 16px -6px rgba(0, 0, 0, 0.7);
+  color: var(--bw-on-accent);
+}
+
+.dk-item[aria-current='page'] .dk-label {
+  max-width: 150px;
+  margin-left: 9px;
+  opacity: 1;
+}
+
+/* Tooltips: decoration only (the label above is what assistive technology reads). */
+.dk-tip {
+  position: absolute;
+  bottom: calc(100% + 14px);
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: var(--bw-space-2);
+  padding: 6px 10px;
+  border: 1px solid var(--bw-border);
+  border-radius: var(--bw-radius-sm);
+  background: var(--bw-surface-raised);
+  box-shadow: 0 10px 24px -8px rgba(0, 0, 0, 0.8);
+  color: var(--bw-text);
+  font-size: var(--bw-text-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 4px);
+  transition:
+    opacity 160ms var(--bw-ease),
+    transform 200ms var(--bw-ease);
+}
+
+.dk-tip kbd {
+  min-width: 18px;
+  padding: 0 5px;
+  border: 1px solid var(--bw-border-hover);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--bw-text-muted);
+  font: inherit;
+  font-size: var(--bw-text-xs);
+  text-align: center;
+}
+
+.dk-item:hover .dk-tip,
+.dk-item:focus-visible .dk-tip,
+.dk-corner:hover .dk-tip,
+.dk-corner:focus-visible .dk-tip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* The current page already shows its name, so it only shows the key hint. */
+.dk-item[aria-current='page'] .dk-tip span {
+  display: none;
+}
+
+/* Corner buttons: the logo (top left) and the privacy reminder (top right). */
+.dk-corner {
+  position: fixed;
+  top: 14px;
+  z-index: 40;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 50%;
+  background: rgba(14, 14, 17, 0.72);
+  -webkit-backdrop-filter: blur(16px) saturate(135%);
+  backdrop-filter: blur(16px) saturate(135%);
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.75);
+  color: var(--bw-accent-text);
+  transition:
+    border-color 200ms var(--bw-ease),
+    background-color 200ms var(--bw-ease);
+}
+
+.dk-corner:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(34, 34, 40, 0.72);
+}
+
+.dk-corner:focus-visible {
+  outline: 2px solid var(--bw-accent);
+  outline-offset: 3px;
+}
+
+.dk-brand {
+  left: 14px;
+}
+
+.dk-privacy {
+  right: 14px;
+}
+
+.dk-logo {
+  display: block;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+/* Corner tooltips open downwards, away from the edge of the window. */
+.dk-tip-below {
+  top: calc(100% + 10px);
+  bottom: auto;
+}
+
+.dk-brand .dk-tip-below {
+  left: 0;
+  transform: translate(0, -4px);
+}
+
+.dk-brand:hover .dk-tip-below,
+.dk-brand:focus-visible .dk-tip-below {
+  transform: translate(0, 0);
+}
+
+.dk-privacy .dk-tip-below {
+  right: 0;
+  left: auto;
+  transform: translate(0, -4px);
+}
+
+.dk-privacy:hover .dk-tip-below,
+.dk-privacy:focus-visible .dk-tip-below {
+  transform: translate(0, 0);
+}
+
+@media (max-width: 560px) {
+  .dk {
+    gap: 6px;
+  }
+
+  .dk-item {
+    height: 42px;
+    min-width: 42px;
+    padding: 0 11px;
+  }
+
+  /* On a narrow window the current page is shown as a filled icon, not a wide pill. */
+  .dk-item[aria-current='page'] .dk-label {
+    max-width: 0;
+    margin-left: 0;
+    opacity: 0;
+  }
+
+  .dk-corner {
+    top: 10px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .dk-brand {
+    left: 10px;
+  }
+
+  .dk-privacy {
+    right: 10px;
+  }
 }
 
 .db-main:focus {
@@ -368,39 +522,12 @@
   font-size: var(--bw-text-sm);
 }
 
-/* ---------- Narrow windows: sidebar becomes a top bar ---------- */
+/* ---------- Narrow windows ---------- */
 
 @media (max-width: 820px) {
-  .db-shell {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .db-sidebar {
-    position: static;
-    height: auto;
-    flex-direction: row;
-    align-items: center;
-    gap: var(--bw-space-3);
-    padding: var(--bw-space-3);
-    border-right: 0;
-    border-bottom: 1px solid var(--bw-border-subtle);
-    overflow-x: auto;
-  }
-
-  .db-nav {
-    flex-direction: row;
-  }
-
-  .db-nav-link {
-    white-space: nowrap;
-  }
-
-  .db-sidebar-foot {
-    display: none;
-  }
-
   .db-main {
-    padding: var(--bw-space-5) var(--bw-space-4) 40px;
+    /* The corner buttons sit above the title, so the top padding leaves room for them. */
+    padding: 60px var(--bw-space-4) 120px;
   }
 
   .db-usage-row,
