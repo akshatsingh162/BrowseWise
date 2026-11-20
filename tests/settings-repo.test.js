@@ -131,3 +131,20 @@ describe('focus settings', () => {
     });
   });
 });
+
+describe('dock setting', () => {
+  it('hides the dock while scrolling by default', () => {
+    expect(sanitizeSettings(null).dockAutoHide).toBe(true);
+  });
+
+  it('accepts either value, and ignores a value of the wrong type', () => {
+    expect(sanitizeSettings({ dockAutoHide: false }).dockAutoHide).toBe(false);
+    expect(sanitizeSettings({ dockAutoHide: true }).dockAutoHide).toBe(true);
+    expect(sanitizeSettings({ dockAutoHide: 'no' }).dockAutoHide).toBe(true);
+    expect(sanitizeSettings({ dockAutoHide: 0 }).dockAutoHide).toBe(true);
+  });
+
+  it('is filled in for an install that was made before it existed', () => {
+    expect(sanitizeSettings({ idleThresholdSeconds: 90 }).dockAutoHide).toBe(true);
+  });
+});

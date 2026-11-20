@@ -132,6 +132,7 @@ describe('settings page: layout and loading', () => {
     expect(sections).toEqual([
       'Tracking',
       'Focus timer',
+      'Appearance',
       'History',
       'Notifications',
       'Your data',
@@ -725,5 +726,54 @@ describe('settings page: refreshing never wipes controls', () => {
     await ready();
     page.unmount();
     expect(unsubscribe).toHaveBeenCalled();
+  });
+});
+
+describe('settings page: appearance', () => {
+  it('has a switch for hiding the navigation dock while scrolling, on by default', async () => {
+    mount();
+    await ready();
+    const dock = byId('setting-dock-autohide');
+    expect(dock.getAttribute('aria-checked')).toBe('true');
+    expect(container.querySelector('label[for="setting-dock-autohide"]').textContent).toBe(
+      'Hide the navigation dock while scrolling down',
+    );
+  });
+
+  it('shows the stored value', async () => {
+    mount(data({ settings: { dockAutoHide: false } }));
+    await ready();
+    expect(byId('setting-dock-autohide').getAttribute('aria-checked')).toBe('false');
+  });
+
+  it('saves a change straight away and says so', async () => {
+    const { deps } = mount();
+    await ready();
+    byId('setting-dock-autohide').click();
+    expect(byId('setting-dock-autohide').getAttribute('aria-checked')).toBe('false');
+    await vi.waitFor(() =>
+      expect(deps.updateSettings).toHaveBeenCalledWith({ dockAutoHide: false }),
+    );
+    await vi.waitFor(() =>
+      expect(status()).toBe('Hide the navigation dock while scrolling down turned off.'),
+    );
+  });
+
+  it('puts the switch back when saving fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    mount(data(), {
+      updateSettings: vi.fn(async () => {
+        throw new Error('quota');
+      }),
+    });
+    await ready();
+    byId('setting-dock-autohide').click();
+    await vi.waitFor(() => expect(status()).toContain('Could not save the setting'));
+    expect(byId('setting-dock-autohide').getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('is unavailable until the stored values have loaded', () => {
+    mount(data(), { loadSettingsData: vi.fn(() => new Promise(() => {})) });
+    expect(byId('setting-dock-autohide').disabled).toBe(true);
   });
 });
