@@ -19,6 +19,7 @@ BrowseWise measures how much active time you spend on each website and shows it 
 - A daily goal and per-website limits with optional notifications (BrowseWise only reminds you, it never blocks anything)
 
 - A modern dark interface: layered gradients, a fine grid and film grain, glass-style cards, and subtle parallax that is switched off for people who prefer reduced motion
+- No sidebar: a floating navigation dock (it hides while you scroll, and number keys 1 to 7 jump between pages) gives the content the whole window
 - History by day, by week, and for a single website, with a link from any day to its detailed analytics
 - A Settings page: idle threshold, tracking switches, and how long history is kept
 - CSV and JSON export, and separate buttons to clear history or delete everything

@@ -82,23 +82,23 @@ Open the popup by clicking the BrowseWise icon in the toolbar (pin it from the p
 
 Open it from the popup's **Open dashboard** button.
 
-| #   | Test               | Steps                                                                                            | Expected                                                                                       |
-| --- | ------------------ | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| D1  | Opens once         | Click **Open dashboard** twice from the popup                                                    | One dashboard tab; the second click focuses it                                                 |
-| D2  | Navigation         | Click each of the five sidebar items, then use the browser Back and Forward buttons              | Page changes, address ends in `#overview`, `#analytics`, etc., highlight follows, Back works   |
-| D3  | Deep link / reload | On `#websites` press F5                                                                          | Stays on Websites                                                                              |
-| D4  | Overview numbers   | Compare Overview with the popup                                                                  | Total, website count, and most-used site agree (within a few seconds)                          |
-| D5  | Live update        | Leave the dashboard open, browse another site for a minute in a different tab, switch back       | Numbers have caught up without reloading                                                       |
-| D6  | Comparison tooltip | Hover the line under the total                                                                   | Tooltip explains the comparison with yesterday                                                 |
-| D7  | Ranges             | On Websites click **Today**, **7 days**, **30 days**                                             | List reloads; multi-day summary reads "across N of 7 days" (or 30); the selected button is lit |
-| D8  | Filter             | Type part of a domain                                                                            | Only matches remain, rank numbers keep their original values; clearing restores the list       |
-| D9  | Filter focus       | Type in the filter box and keep typing for 30 s or more                                          | The box never loses focus or text when data refreshes                                          |
-| D10 | Empty state        | Run `chrome.storage.local.clear()` in the worker console and reload the extension, open Websites | "No browsing time recorded" message; Overview shows zeros and "—" without errors               |
-| D11 | Placeholder pages  | Open Analytics, Goals & limits, Settings                                                         | Each shows a heading and "Coming soon", nothing broken                                         |
-| D12 | Keyboard           | Tab through the sidebar and page controls; press Enter on a nav item                             | Visible focus ring everywhere; after navigating, focus moves into the page                     |
-| D13 | Narrow window      | Drag the window narrower than about 800 px                                                       | Sidebar becomes a top bar, list stays readable, no sideways page scroll                        |
-| D14 | Favicons           | Check icons in the lists                                                                         | Real icons for visited sites, a neutral globe otherwise                                        |
-| D15 | Network silence    | In dashboard DevTools open **Network** and reload                                                | Only `chrome-extension://` requests                                                            |
+| #   | Test               | Steps                                                                                            | Expected                                                                                                                  |
+| --- | ------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| D1  | Opens once         | Click **Open dashboard** twice from the popup                                                    | One dashboard tab; the second click focuses it                                                                            |
+| D2  | Navigation         | Click each of the seven dock buttons, then use the browser Back and Forward buttons              | Page changes, address ends in `#overview`, `#analytics`, etc., the current page is a light pill with its name, Back works |
+| D3  | Deep link / reload | On `#websites` press F5                                                                          | Stays on Websites                                                                                                         |
+| D4  | Overview numbers   | Compare Overview with the popup                                                                  | Total, website count, and most-used site agree (within a few seconds)                                                     |
+| D5  | Live update        | Leave the dashboard open, browse another site for a minute in a different tab, switch back       | Numbers have caught up without reloading                                                                                  |
+| D6  | Comparison tooltip | Hover the line under the total                                                                   | Tooltip explains the comparison with yesterday                                                                            |
+| D7  | Ranges             | On Websites click **Today**, **7 days**, **30 days**                                             | List reloads; multi-day summary reads "across N of 7 days" (or 30); the selected button is lit                            |
+| D8  | Filter             | Type part of a domain                                                                            | Only matches remain, rank numbers keep their original values; clearing restores the list                                  |
+| D9  | Filter focus       | Type in the filter box and keep typing for 30 s or more                                          | The box never loses focus or text when data refreshes                                                                     |
+| D10 | Empty state        | Run `chrome.storage.local.clear()` in the worker console and reload the extension, open Websites | "No browsing time recorded" message; Overview shows zeros and "—" without errors                                          |
+| D11 | Placeholder pages  | Open Analytics, Goals & limits, Settings                                                         | Each shows a heading and "Coming soon", nothing broken                                                                    |
+| D12 | Keyboard           | Press Tab from the top of the page, then Enter on a dock button                                  | The corner buttons and the dock come first, with a visible focus ring; after navigating, focus moves into the page        |
+| D13 | Narrow window      | Drag the window narrower than about 800 px                                                       | The dock stays at the bottom, the list stays readable, no sideways page scroll                                            |
+| D14 | Favicons           | Check icons in the lists                                                                         | Real icons for visited sites, a neutral globe otherwise                                                                   |
+| D15 | Network silence    | In dashboard DevTools open **Network** and reload                                                | Only `chrome-extension://` requests                                                                                       |
 
 ## Sample data (optional, for testing charts)
 
@@ -166,11 +166,11 @@ Open the dashboard and choose **Analytics**. Use the sample data above for tests
 
 ## Logo
 
-| #   | Test               | Steps                                                          | Expected                                                   |
-| --- | ------------------ | -------------------------------------------------------------- | ---------------------------------------------------------- |
-| L1  | Toolbar            | Look at the pinned toolbar icon (try a light and a dark theme) | The blue "bw" tile is clearly visible and readable on both |
-| L2  | Popup and sidebar  | Open the popup and the dashboard                               | Same logo in the popup header and the dashboard sidebar    |
-| L3  | Tab and extensions | Look at the dashboard browser tab and `chrome://extensions`    | The logo appears on the tab and on the extension card      |
+| #   | Test                | Steps                                                          | Expected                                                             |
+| --- | ------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------- |
+| L1  | Toolbar             | Look at the pinned toolbar icon (try a light and a dark theme) | The blue "bw" tile is clearly visible and readable on both           |
+| L2  | Popup and dashboard | Open the popup and the dashboard                               | Same logo in the popup header and in the dashboard's top-left button |
+| L3  | Tab and extensions  | Look at the dashboard browser tab and `chrome://extensions`    | The logo appears on the tab and on the extension card                |
 
 ## Categories (Phase 6)
 
@@ -446,3 +446,31 @@ await chrome.storage.local.set({ focusState: { ...s, endsAt: Date.now() + 10000 
 | D12 | Update in place  | Replace the files in the same folder and press reload                         | Your data is still there                                                                        |
 | D13 | Different folder | Load the same build from another folder and look at your data                 | **Report what you see** (a second copy with empty data would confirm the folder-path behaviour) |
 | D14 | Chrome's message | Restart Chrome with the extension loaded                                      | **Report whether Chrome shows a developer-mode message, and what it says**                      |
+
+## Navigation dock (Phase 11)
+
+Open the dashboard. There is no sidebar: the navigation is a row of floating buttons at the bottom, and the logo and a privacy shield float in the top corners.
+
+| #   | Test              | Steps                                                                                              | Expected                                                                                                             |
+| --- | ----------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| N1  | Look              | Open **Overview**                                                                                  | The content uses the whole window. Only round buttons are drawn at the bottom: no bar behind them                    |
+| N2  | Current page      | Click through the pages                                                                            | The current page is a light pill with its name; the others are icons                                                 |
+| N3  | Tooltips          | Hover each button, and Tab onto each one                                                           | A small tooltip with the page name and its number key                                                                |
+| N4  | Swelling          | Move the mouse slowly along the dock                                                               | The buttons near the pointer swell and lift a little, smoothly; they settle when you leave                           |
+| N5  | Hiding            | Open **History**, scroll down                                                                      | The dock slides down out of view. The page text is not covered at any point                                          |
+| N6  | Coming back       | Scroll up a little; or move the mouse to the bottom edge; or press Tab                             | The dock slides back each time                                                                                       |
+| N7  | Top and bottom    | Scroll to the very top, and to the very bottom                                                     | The dock is visible at both                                                                                          |
+| N8  | Staying put       | **Settings → Appearance**, turn off **Hide the navigation dock while scrolling down**, then scroll | The dock never hides. Turn it on again and it hides again, without reloading                                         |
+| N9  | Over content      | Scroll so that text and charts are behind the dock                                                 | The buttons stay easy to see, with the text behind them blurred                                                      |
+| N10 | Number keys       | Press 1 to 7 with no field focused                                                                 | Each key opens the page in dock order (1 Overview, 2 Analytics, 3 Websites, 4 History, 5 Focus, 6 Goals, 7 Settings) |
+| N11 | Typing is safe    | Type a number in the website box on **History** or in a Settings field                             | The number stays in the field and the page does not change                                                           |
+| N12 | Browser shortcuts | Press Ctrl+1 and Ctrl+2                                                                            | Chrome switches tabs as usual; BrowseWise does not react                                                             |
+| N13 | Dialog            | Open a confirmation dialog (**Settings → Clear history…**), press 3                                | Nothing happens while the dialog is open                                                                             |
+| N14 | Logo button       | Click the logo at the top left                                                                     | Opens **Overview**                                                                                                   |
+| N15 | Privacy button    | Hover and click the shield at the top right                                                        | A tooltip says your data stays on this device; clicking opens **Settings**                                           |
+| N16 | Narrow window     | Make the window about 400 px wide                                                                  | All seven buttons fit; the current page is a filled icon; nothing overlaps the page title                            |
+| N17 | Reduced motion    | Turn on reduced motion in Windows                                                                  | The buttons do not swell and the dock does not animate in; hiding and showing still work                             |
+| N18 | Keyboard reach    | Scroll until the dock is hidden, then press Tab                                                    | The dock comes back and the first button has a visible focus ring                                                    |
+| N19 | Screen reader     | Move through the navigation with a screen reader                                                   | It finds a navigation named "Main", and each link is read by its page name; the tooltips are not read twice          |
+| N20 | 200% zoom         | Zoom the page to 200%                                                                              | The dock stays usable and does not cover the page's controls                                                         |
+| N21 | Frame rate        | Record a Performance trace while scrolling a long page with the dock showing and hiding            | Smooth. **Report the machine and whether the blur ever stutters**                                                    |

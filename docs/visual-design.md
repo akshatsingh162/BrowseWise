@@ -56,6 +56,34 @@ Gradients and grain mean text no longer sits on one flat colour, so contrast was
 
 Result: **345 visible text runs across the popup and all six dashboard pages, none failing; the tightest margin was 5.39:1.** The first measurement failed (page descriptions at about 3.1:1 to 3.7:1, over the brightest part of the glow), which led to softer grid dots and lighter secondary text. Not measured: hover and focus states, chart labels drawn on a canvas, and system-drawn dropdown lists.
 
+## Navigation
+
+There is no sidebar. The page uses the whole window, and navigation is a **floating dock**: a row of round glass buttons at the bottom centre. Nothing is drawn behind the row, so only the buttons are visible.
+
+- **The current page** is a light pill with its name and a warm glow. The other pages are icons; a tooltip shows the name and the number key.
+- **Swelling.** Buttons near the pointer swell by up to 22% and lift a few pixels, with a smooth falloff (like a dock on a desktop). Not used with reduced motion, and not on touch screens.
+- **Hiding.** The dock slides down while scrolling down, below the first 80 px of the page. It comes back when scrolling up, at the top or bottom of the page, when the pointer goes to the bottom edge, or when keyboard focus moves into it. It never hides while the pointer is over it or focus is inside it. **Settings → Appearance** can keep it always visible.
+- **Corner buttons.** The logo (top left, opens Overview) and a shield (top right, opens Settings) replace the sidebar's header and its "Your data stays on this device" note.
+- **Keys 1 to 7** open the pages in dock order. They are ignored while typing in a field, while a dialog is open, and with Ctrl, Alt, Cmd or Shift held, so browser shortcuts such as Ctrl+1 are never taken over.
+- **Narrow windows.** The buttons shrink, and the current page is a filled icon instead of a wide pill. At 390 px all seven fit with no sideways scrolling. The page's bottom padding keeps the dock from covering its end.
+
+### Accessibility
+
+Every button is a real link inside a navigation named "Main", with its page name as real text (only drawn for the current page), so screen readers read it normally. The tooltips are hidden from assistive technology so names are not read twice. The dock comes before the content in the document, so keyboard users reach it first; when it is hidden it stays in the tab order, and focusing it brings it back.
+
+### What was measured
+
+Dock and corner buttons were measured in headless Chromium over real page content (history rows, a chart, Settings text, narrow cards), with the icons hidden so the pixels behind them could be sampled:
+
+| What                         | Needed | Measured (worst of 24 buttons, 5 situations) |
+| ---------------------------- | ------ | -------------------------------------------- |
+| Icons against what is behind | 3:1    | 7.45:1                                       |
+| The current page's name      | 4.5:1  | 15.95:1                                      |
+
+### A bug this design hit
+
+The dock's first version let page text show through the buttons sharp instead of blurred. The cause was the entrance animation: a finished animation that keeps holding a value (`fill-mode: both`) stopped the wrapper from letting its buttons blur the page behind it. The animation now uses `backwards`, and a test guards that. The buttons' backing was also made more opaque (72%), so they stay readable even where blur is unavailable.
+
 ## Dialogs
 
 Dialogs use a solid surface with a blurred backdrop. An early version used the glass card and let the page text show through, which is why dialogs are explicitly opaque.
@@ -64,7 +92,7 @@ Dialogs use a solid surface with a blurred backdrop. An early version used the g
 
 - Scroll movement runs on the compositor, not in JavaScript.
 - Pointer movement costs one small update per frame, only while the pointer moves.
-- Glass cards do not use `backdrop-filter`, which would be re-blurred while the background moves. Only the sidebar and the dialog backdrop do.
+- Glass cards do not use `backdrop-filter`, which would be re-blurred while the background moves. Only the dock buttons, the two corner buttons, and the dialog backdrop do.
 - Not measured: frame rates on real hardware. Check with the manual test list.
 
 ## Known limitations
