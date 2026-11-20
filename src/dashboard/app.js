@@ -15,7 +15,7 @@ import {
   setDailyGoal,
   setSiteLimit,
 } from '../shared/storage/goals-repo.js';
-import { updateSettings } from '../shared/storage/settings-repo.js';
+import { getSettings, updateSettings } from '../shared/storage/settings-repo.js';
 import { subscribeToUsageChanges } from '../shared/usage-events.js';
 import { loadDailyAnalytics, loadMonthlyAnalytics, loadWeeklyAnalytics } from './analytics-data.js';
 import { createChart } from './charts/chart-factory.js';
@@ -23,6 +23,7 @@ import { readChartTheme } from './charts/chart-theme.js';
 import { loadGoalsData } from './goals-data.js';
 import { loadOverviewData, loadWebsiteUsage } from './data.js';
 import { loadFocusData } from './focus-data.js';
+import { attachNavigationShortcuts } from './shortcuts.js';
 import { loadHistoryOverview, loadSiteHistory } from './history-data.js';
 import { mountAnalyticsPage } from './pages/analytics.js';
 import { mountFocusPage } from './pages/focus.js';
@@ -118,6 +119,16 @@ const PAGES = {
 export function startDashboard(root) {
   const shell = createShell(root);
   let currentPage = null;
+
+  // The dock can be set to stay visible (Settings). Follow that setting, including when it
+  // is changed from another tab.
+  const applyDockSetting = () =>
+    getSettings()
+      .then((settings) => shell.setAutoHide(settings.dockAutoHide))
+      .catch((error) => console.debug('[BrowseWise] could not read the dock setting', error));
+  void applyDockSetting();
+  const stopWatchingSettings = subscribeToUsageChanges(() => void applyDockSetting());
+  const detachShortcuts = attachNavigationShortcuts({ routes: ROUTES });
   let isFirstNavigation = true;
 
   function navigate(routeId, params) {
@@ -138,6 +149,9 @@ export function startDashboard(root) {
   return {
     stop() {
       router.stop();
+      stopWatchingSettings();
+      detachShortcuts();
+      shell.destroy();
       currentPage?.unmount();
       currentPage = null;
     },
